@@ -2,38 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AccessifiED | Find Accessible Places</title>
+    <title>AccessifiED | Calm Search</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;500&display=swap" rel="stylesheet">
+
     <style>
-        /* 1. The Main Header Container */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Lexend', sans-serif; /* Applied globally for readability */
+            background-color: #F9F9F7; /* Soft cream for low sensory */
+            color: #333;
+        }
+
         .hero-section {
-            /* Replace the URL below with your own image link later! */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+            /* We use a slightly heavier overlay (0.6) to make it easier on the eyes */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                               url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000');
             background-size: cover;
             background-position: center;
-            height: 400px; /* How tall the header is */
+            height: 400px;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centers vertically */
-            align-items: center;     /* Centers horizontally */
-            color: white;            /* Makes text white to stand out */
-            font-family: Arial, sans-serif;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 0 20px;
         }
 
-        /* 2. Styling the Title */
         .hero-section h1 {
             font-size: 3rem;
+            font-weight: 500;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Makes it readable over images */
+            letter-spacing: 1px; /* Extra space between letters helps with low-sensory reading */
         }
 
-        /* 3. The Search Bar (Optional but very Yelp-like!) */
+        .hero-section p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            max-width: 600px;
+        }
+
         .search-box {
-            padding: 15px;
-            width: 60%;
-            border-radius: 5px;
+            margin-top: 20px;
+            padding: 15px 25px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 30px; /* Rounded corners are perceived as "friendlier" */
             border: none;
-            font-size: 1.1rem;
+            font-family: 'Lexend', sans-serif;
+            font-size: 1rem;
+            outline: none;
         }
     </style>
 </head>
@@ -41,14 +61,14 @@
 
     <header class="hero-section">
         <h1>AccessifiED</h1>
-        <p>Search for wheelchair-accessible cafes, parks, and more.</p>
+        <p>A calm way to find accessible spaces in your Edmonton.</p>
         
-        <input type="text" class="search-box" placeholder="Find cafes, restaurants, ramps...">
+        <input type="text" class="search-box" placeholder="Search for ramps, quiet cafes, parks...">
     </header>
 
-    <main style="padding: 20px; text-align: center;">
-        <h2>Explore Nearby Places</h2>
-        <p>Your content for accessible locations will go here!</p>
+    <main style="padding: 40px; max-width: 800px; margin: 0 auto;">
+        <h2>Welcome</h2>
+        <p>Using the <strong>Lexend</strong> font helps reduce visual noise, making it easier to process information quickly without feeling overwhelmed.</p>
     </main>
 
 </body>
