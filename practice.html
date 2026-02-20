@@ -2,21 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AccessifiED | Calm Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccessifiED | Low-Sensory Search</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;500&display=swap" rel="stylesheet">
 
     <style>
+        /* CSS VARIABLES - Easy to change colors in one place */
+        :root {
+            --bg-color: #F9F9F7;      /* Light: Off-white/Cream */
+            --text-color: #333333;    /* Light: Charcoal */
+            --header-bg: #7D9D85;     /* Light: Sage Green */
+            --card-bg: #FFFFFF;
+            --tag-bg: #E2E8E4;
+            --accent-color: #2C3E50;
+        }
+
+        /* DARK MODE VARIABLES */
+        body.dark-mode {
+            --bg-color: #1A1B1E;      /* Dark: Deep Ink */
+            --text-color: #E8ECEF;    /* Dark: Soft Silver */
+            --header-bg: #2D3A30;     /* Dark: Deep Forest */
+            --card-bg: #25262B;
+            --tag-bg: #373A40;
+            --accent-color: #A5D8FF;  /* Dark: Soft Mint/Blue */
+        }
+
+        /* GENERAL STYLES */
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Lexend', sans-serif; /* Applied globally for readability */
-            background-color: #F9F9F7; /* Soft cream for low sensory */
-            color: #333;
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
         }
 
+        /* BUTTONS */
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .mode-toggle {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 25px;
+            border: 1px solid white;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-family: 'Lexend', sans-serif;
+            backdrop-filter: blur(5px);
+        }
+
+        /* HERO SECTION */
         .hero-section {
-            /* We use a slightly heavier overlay (0.6) to make it easier on the eyes */
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                               url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000');
             background-size: cover;
@@ -32,44 +75,150 @@
         }
 
         .hero-section h1 {
-            font-size: 3rem;
+            font-size: clamp(2rem, 8vw, 3.5rem); /* Responsive size */
+            margin: 0;
             font-weight: 500;
-            margin-bottom: 10px;
-            letter-spacing: 1px; /* Extra space between letters helps with low-sensory reading */
-        }
-
-        .hero-section p {
-            font-size: 1.2rem;
-            font-weight: 300;
-            max-width: 600px;
         }
 
         .search-box {
-            margin-top: 20px;
+            margin-top: 25px;
             padding: 15px 25px;
-            width: 80%;
+            width: 90%;
             max-width: 500px;
-            border-radius: 30px; /* Rounded corners are perceived as "friendlier" */
+            border-radius: 30px;
             border: none;
+            font-size: 1.1rem;
             font-family: 'Lexend', sans-serif;
-            font-size: 1rem;
-            outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* CARD GRID */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 50px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            margin: 0 0 10px 0;
+            color: var(--accent-color);
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: var(--tag-bg);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 5px 5px 0 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
 
+    <div class="controls">
+        <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle Dark Mode">
+            🌙 Switch Mode
+        </button>
+    </div>
+
     <header class="hero-section">
         <h1>AccessifiED</h1>
-        <p>A calm way to find accessible spaces in your Edmonton.</p>
-        
-        <input type="text" class="search-box" placeholder="Search for ramps, quiet cafes, parks...">
+        <p>A quiet, simple way to find accessible spaces.</p>
+        <input type="text" id="searchInput" class="search-box" placeholder="Try 'cafe' or 'park'...">
     </header>
 
-    <main style="padding: 40px; max-width: 800px; margin: 0 auto;">
-        <h2>Welcome</h2>
-        <p>Using the <strong>Lexend</strong> font helps reduce visual noise, making it easier to process information quickly without feeling overwhelmed.</p>
+    <main class="results-grid" id="cardContainer">
+        <article class="card">
+            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500" alt="Quiet cafe" class="card-img">
+            <div class="card-content">
+                <h3 class="card-title">The Quiet Bean</h3>
+                <p>Wide aisles, ramp access, and no loud background music.</p>
+                <span class="tag">Wheelchair Accessible</span>
+                <span class="tag">Low Noise</span>
+            </div>
+        </article>
+
+        <article class="card">
+            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500" alt="Accessible park" class="card-img">
+            <div class="card-content">
+                <h3 class="card-title">Oakwood Park</h3>
+                <p>Paved trails with plenty of benches and sensory-friendly zones.</p>
+                <span class="tag">Flat Paths</span>
+                <span class="tag">Sensory Friendly</span>
+            </div>
+        </article>
+
+        <article class="card">
+            <img src="https://images.unsplash.com/photo-1521333613867-08182737bc04?w=500" alt="Library interior" class="card-img">
+            <div class="card-content">
+                <h3 class="card-title">Central Library</h3>
+                <p>Elevators to all floors and dimmable lighting in study rooms.</p>
+                <span class="tag">Elevator</span>
+                <span class="tag">Quiet Zone</span>
+            </div>
+        </article>
     </main>
 
+    <footer>
+        <p>Built with ❤️ for Accessibility</p>
+    </footer>
+
+    <script>
+        function toggleMode() {
+            document.body.classList.toggle("dark-mode");
+            const btn = document.querySelector('.mode-toggle');
+            if(document.body.classList.contains('dark-mode')) {
+                btn.innerHTML = "☀️ Light Mode";
+            } else {
+                btn.innerHTML = "🌙 Dark Mode";
+            }
+        }
+
+        // Simple Search Filter Logic
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            let query = e.target.value.toLowerCase();
+            let cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                let text = card.innerText.toLowerCase();
+                card.style.display = text.includes(query) ? "block" : "none";
+            });
+        });
+    </script>
 </body>
 </html>
