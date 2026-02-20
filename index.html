@@ -236,6 +236,11 @@
                     <input type="text" id="language-input" placeholder="e.g. English, Spanish, ASL">
                 </div>
 
+                <div class="input-group">
+                    <label for="image-upload">Upload a Photo of the Entrance</label>
+                    <input type="file" id="image-upload" accept="image/*">
+                </div>
+
 
                 <button type="submit" class="nav-btn-main" style="width:100%; margin-top:20px; padding: 15px; border-radius: 30px; font-size: 1.1rem; border:none; cursor:pointer; font-family:inherit;">Submit Spot</button>
             </form>
@@ -331,31 +336,67 @@
         document.getElementById('postForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
-            btn.innerText = 'Saving...';
+            const originalBtnText = btn.innerText;
+            btn.innerText = 'Uploading Image...';
+            btn.disabled = true; // Prevent double-clicking
 
+            // 1. Get the file from the input
+            const fileInput = document.getElementById('image-upload');
+            const file = fileInput.files[0];
+            let imageUrl = "";
 
+            // 2. Upload to Storage if a file is selected
+            if (file) {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Math.random()}.${fileExt}`;
+                const filePath = `${fileName}`;
+
+                const { data: uploadData, error: uploadError } = await _supabase.storage
+                    .from('place-images')
+                    .upload(filePath, file);
+
+                if (uploadError) {
+                    console.error("Upload Error:", uploadError);
+                    alert("Image upload failed, but we'll try to save the rest.");
+                } else {
+                    // Get the URL of the photo we just uploaded
+                    const { data } = _supabase.storage.from('place-images').getPublicUrl(filePath);
+                    imageUrl = data.publicUrl;
+                }
+            }
+
+            // 3. Insert everything into the Table
+            btn.innerText = 'Saving Details...';
+            
             const { error } = await _supabase.from('Places').insert([{
                 name: document.getElementById('name').value,
+                lat: parseFloat(document.getElementById('lat-input').value),
+                lng: parseFloat(document.getElementById('lng-input').value),
+                image_url: imageUrl, // Storing the link to the photo here
                 wheel_chair: document.getElementById('wheelchair-checkbox').checked,
                 service_animals: document.getElementById('service-animals-checkbox').checked,
                 ASL_accessible: document.getElementById('ASL-checkbox').checked,
                 automatic_doors: document.getElementById('automatic-doors-checkbox').checked,
+                low_interaction: document.getElementById('low-interaction-checkbox').checked,
                 low_noise_level: document.getElementById('low-noise-checkbox').checked,
+                written_info: document.getElementById('written-info-checkbox').checked,
                 screen_readers: document.getElementById('screen-readers-checkbox').checked,
                 low_sensory: document.getElementById('low-sensory-checkbox').checked,
-                languages: document.getElementById('language-input').value // Grabs the text string
+                languages: document.getElementById('language-input').value
             }]);
 
-
-            if (error) {
-                alert("Error: " + error.message);
-                btn.innerText = 'Submit Spot';
-            } else {
-                alert("Success!");
-                e.target.reset();
-                showView('explore');
-            }
-        });
+    if (error) {
+        alert("Error saving to database: " + error.message);
+        btn.innerText = originalBtnText;
+        btn.disabled = false;
+    } else {
+        alert("Success! Spot added.");
+        e.target.reset();
+        btn.innerText = originalBtnText;
+        btn.disabled = false;
+        showView('explore'); // Go back to the main screen
+    }
+});
 
 
         loadPlaces();
