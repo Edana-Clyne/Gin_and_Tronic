@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccessifiED | Find Accessible Places</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* 1. COLOR THEMES */
+        :root {
+            --bg-color: #F9F9F7;
+            --text-color: #333333;
+            --nav-bg: #FFFFFF;
+            --accent: #7D9D85;
+            --card-bg: #FFFFFF;
+            --tag-bg: #E2E8E4;
+            --input-bg: #FFFFFF;
+            --sidebar-bg: #FFFFFF;
+        }
+
+        body.dark-mode {
+            --bg-color: #1A1B1E;
+            --text-color: #E8ECEF;
+            --nav-bg: #25262B;
+            --accent: #A5D8FF;
+            --card-bg: #25262B;
+            --tag-bg: #373A40;
+            --input-bg: #2C2D33;
+            --sidebar-bg: #25262B;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
+        }
+
+        /* 2. NAVIGATION */
+        nav {
+            background: var(--nav-bg);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1001; /* Above map popups */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav-logo { font-weight: bold; font-size: 1.5rem; color: var(--accent); }
+        .nav-links button {
+            background: none; border: none; cursor: pointer;
+            font-family: 'Lexend', sans-serif; font-weight: 500;
+            color: var(--text-color); margin-left: 15px;
+            padding: 8px 15px; border-radius: 20px;
+            transition: 0.2s;
+        }
+        .nav-btn-main { background: var(--accent) !important; color: white !important; }
+
+        /* 3. HERO SECTION */
+        .hero-section {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                              url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000');
+            background-size: cover; background-position: center; height: 250px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
+        }
+        .hero-section h1 { font-size: 3rem; margin: 0; }
+        .search-box {
+            padding: 15px 25px; width: 80%; max-width: 500px;
+            border-radius: 30px; border: none; font-size: 1.1rem;
+            margin-top: 20px; font-family: 'Lexend', sans-serif;
+            outline: none;
+        }
+
+        /* 4. MAP STYLING */
+        #map {
+            height: 400px;
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            border-radius: 20px;
+            border: 2px solid var(--tag-bg);
+            z-index: 1; /* Keep it below navbar */
+        }
+
+        /* 5. EXPLORE VIEW LAYOUT */
+        .explore-container {
+            display: flex;
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px 40px 20px;
+            gap: 30px;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            padding: 25px;
+            border-radius: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 1px solid var(--tag-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .clear-btn {
+            background: none; border: none; color: var(--accent);
+            cursor: pointer; font-family: 'Lexend'; font-size: 0.8rem; text-decoration: underline;
+        }
+
+        .filter-group {
+            margin-bottom: 15px; display: flex; align-items: center; gap: 12px;
+            cursor: pointer; font-size: 0.9rem;
+        }
+
+        input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; }
+
+        /* 6. PLACES LIST & CARDS */
+        #places-list { flex-grow: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        
+        .place-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--tag-bg);
+            transition: transform 0.2s;
+        }
+        .place-card:hover { transform: translateY(-5px); cursor: pointer; }
+
+        .tag {
+            background: var(--tag-bg);
+            color: var(--text-color);
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 0.7rem; margin: 0 5px 8px 0; display: inline-block;
+            text-transform: capitalize;
+        }
+
+        /* 7. POST FORM */
+        .post-form-container {
+            background: var(--card-bg); padding: 40px;
+            border-radius: 20px; border: 1px solid var(--tag-bg);
+            margin: 40px auto; max-width: 600px;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .input-group input { 
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--tag-bg); 
+            background: var(--input-bg); color: var(--text-color); box-sizing: border-box;
+        }
+
+        @media (max-width: 850px) {
+            .explore-container { flex-direction: column; }
+            .sidebar { width: 100%; position: static; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">AccessifiED</div>
+        <div class="nav-links">
+            <button onclick="showView('explore')">Explore</button>
+            <button onclick="showView('post')" class="nav-btn-main">+ Add a Place</button>
+            <button onclick="toggleDarkMode()">🌙 Mode</button>
+        </div>
+    </nav>
+
+    <div id="explore-view">
+        <header class="hero-section">
+            <h1>AccessifiED</h1>
+            <p>Finding calm and accessible spaces for everyone.</p>
+            <input type="text" id="searchInput" class="search-box" placeholder="Search by name or feature..." onkeyup="filterPlaces()">
+        </header>
+
+        
+
+        <div class="explore-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h3 style="margin:0">Filters</h3>
+                    <button class="clear-btn" onclick="clearFilters()">Clear All</button>
+                </div>
+                
+
+
+                <div class="filter-group"><input type="checkbox" class="filter" id="wheel_chair"> <label for="wheel_chair">Wheelchair Access</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="low_noise_level"> <label for="low_noise_level">Low Noise Level</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="service_animals"> <label for="service_animals">Service Animals</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="ASL_accessible"> <label for="ASL_accessible">ASL Accessible</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="automatic_doors"> <label for="automatic_doors">Automatic Doors</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="low_sensory"> <label for="low_sensory">Low Sensory</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="screen_readers"> <label for="screen_readers">Screen Readers</label></div>
+            </aside>
+
+            <main id="places-list">
+                </main>
+        </div>
+        <div id="map" style="height: 400px; width: 90%; max-width: 1200px; margin: 40px auto; border-radius: 20px; border: 2px solid var(--tag-bg);"></div>
+
+    </div>
+
+    <div id="post-view" style="display: none;">
+        <div class="post-form-container">
+            <h2 style="color: var(--accent); margin-top:0;">Register a New Place</h2>
+            <form id="postForm">
+                <div class="input-group">
+                    <label>Business Name</label>
+                    <input type="text" id="name" placeholder="e.g. The Quiet Cafe" required>
+                </div>
+
+                <div class="input-group" style="display: flex; gap: 10px;">
+                    <div style="flex:1">
+                        <label>Latitude</label>
+                        <input type="number" step="any" id="lat" placeholder="53.54" required>
+                    </div>
+                    <div style="flex:1">
+                        <label>Longitude</label>
+                        <input type="number" step="any" id="lng" placeholder="-113.49" required>
+                    </div>
+                </div>
+                
+                <p><strong>Accessibility Features:</strong></p>
+                <div class="checkbox-group">
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="wheelchair-checkbox"> Wheelchair Accessible</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="ASL-checkbox"> ASL Services</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="service-animals-checkbox"> Service Animals Allowed</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="low-sensory-checkbox"> Low Sensory Environment</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="automatic-doors-checkbox"> Automatic Doors</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="low-noise-checkbox"> Low Noise Level</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="screen-readers-checkbox"> Screen Readers Supported</label>
+                </div>
+
+                <div class="input-group" style="margin-top: 15px;">
+                    <label>Languages Spoken (comma separated)</label>
+                    <input type="text" id="language-input" placeholder="e.g. English, ASL">
+                </div>
+
+                <button type="submit" class="nav-btn-main" style="width:100%; margin-top:20px; padding: 15px; border-radius: 30px; font-size: 1.1rem; border:none; cursor:pointer;">Submit Spot</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const _supabase = supabase.createClient('https://gxgopzsqfhckjjqaiqye.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4Z29wenNxZmhja2pqcWFpcXllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1OTYwMDgsImV4cCI6MjA4NzE3MjAwOH0.NggJExSSWG0jNRA_twt-KJYod2fVqhs7EkTElXjspzQ');
+
+        let allPlaces = [];
+        let map;
+        let markersGroup;
+
+        // Initialize Map
+        function initMap() {
+            if (map) return;
+            map = L.map('map').setView([53.5461, -113.4938], 11);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            markersGroup = L.layerGroup().addTo(map);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function showView(view) {
+            document.getElementById('explore-view').style.display = view === 'explore' ? 'block' : 'none';
+            document.getElementById('post-view').style.display = view === 'post' ? 'block' : 'none';
+            if(view === 'explore') {
+                initMap();
+                setTimeout(() => map.invalidateSize(), 200); // Fixes map rendering bugs
+                loadPlaces();
+            }
+        }
+
+        async function loadPlaces() {
+            const list = document.getElementById('places-list');
+            list.innerHTML = '<p style="text-align:center">Loading...</p>';
+
+            const { data, error } = await _supabase.from('Places').select('*');
+            if (error) return console.error(error);
+            
+            allPlaces = data;
+            filterPlaces();
+        }
+
+        function filterPlaces() {
+            const list = document.getElementById('places-list');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const activeFilters = Array.from(document.querySelectorAll('.filter:checked')).map(cb => cb.id);
+
+            list.innerHTML = '';
+            markersGroup.clearLayers(); // Wipe pins to redraw filtered ones
+
+            allPlaces.forEach(p => {
+                const matchesSearch = p.name.toLowerCase().includes(searchTerm);
+                const matchesFilters = activeFilters.every(filterId => p[filterId] === true);
+
+                if (matchesSearch && matchesFilters) {
+                    // Add Map Marker
+                    if (p.lat && p.lng) {
+                        const marker = L.marker([p.lat, p.lng]).bindPopup(`<b>${p.name}</b>`);
+                        markersGroup.addLayer(marker);
+                    }
+
+                    // Add Card
+                    let tags = '';
+                    const features = ['wheel_chair', 'ASL_accessible', 'service_animals', 'low_sensory', 'automatic_doors', 'low_noise_level', 'screen_readers'];
+                    features.forEach(f => {
+                        if (p[f]) tags += `<span class="tag">${f.replace(/_/g, ' ')}</span>`;
+                    });
+
+                    list.innerHTML += `
+                        <div class="place-card" onclick="map.flyTo([${p.lat}, ${p.lng}], 15)">
+                            <h3 style="margin-top:0; color:var(--accent)">${p.name}</h3>
+                            <div>${tags}</div>
+                            <small style="opacity: 0.7; display:block; margin-top:10px;">Languages: ${p.languages ? (Array.isArray(p.languages) ? p.languages.join(', ') : p.languages) : 'None'}</small>
+                        </div>
+                    `;
+                }
+            });
+
+            if(list.innerHTML === '') list.innerHTML = '<p>No spots match your filters.</p>';
+        }
+
+        function clearFilters() {
+            document.querySelectorAll('.filter').forEach(cb => cb.checked = false);
+            document.getElementById('searchInput').value = '';
+            filterPlaces();
+        }
+
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('filter')) filterPlaces();
+        });
+
+        // Submit Form
+        document.getElementById('postForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerText = 'Saving...';
+
+            // Convert languages string to array
+            const langValue = document.getElementById('language-input').value;
+            const langArray = langValue.split(',').map(s => s.trim()).filter(s => s !== "");
+
+            const { error } = await _supabase.from('Places').insert([{
+                name: document.getElementById('name').value,
+                lat: parseFloat(document.getElementById('lat').value),
+                lng: parseFloat(document.getElementById('lng').value),
+                wheel_chair: document.getElementById('wheelchair-checkbox').checked,
+                service_animals: document.getElementById('service-animals-checkbox').checked,
+                ASL_accessible: document.getElementById('ASL-checkbox').checked,
+                automatic_doors: document.getElementById('automatic-doors-checkbox').checked,
+                low_noise_level: document.getElementById('low-noise-checkbox').checked,
+                screen_readers: document.getElementById('screen-readers-checkbox').checked,
+                low_sensory: document.getElementById('low-sensory-checkbox').checked,
+                languages: langArray 
+            }]);
+
+            if (error) {
+                alert("Error: " + error.message);
+                btn.innerText = 'Submit Spot';
+            } else {
+                alert("Success!");
+                e.target.reset();
+                showView('explore');
+            }
+        });
+
+        // Initialize on load
+        window.onload = () => {
+            initMap();
+            loadPlaces();
+        };
+    </script>
+</body>
+</html>
