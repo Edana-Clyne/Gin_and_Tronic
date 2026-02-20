@@ -3,222 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AccessifiED | Low-Sensory Search</title>
+    <title>AccessifiED | Find Accessible Places</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;500&display=swap" rel="stylesheet">
 
     <style>
-        /* CSS VARIABLES - Easy to change colors in one place */
+        /* 1. COLOR THEMES (Low Sensory Palette) */
         :root {
-            --bg-color: #F9F9F7;      /* Light: Off-white/Cream */
-            --text-color: #333333;    /* Light: Charcoal */
-            --header-bg: #7D9D85;     /* Light: Sage Green */
+            --bg-color: #F9F9F7;      /* Cream background */
+            --text-color: #333333;    /* Soft charcoal */
+            --nav-bg: #FFFFFF;
+            --accent: #7D9D85;       /* Muted Sage Green */
             --card-bg: #FFFFFF;
             --tag-bg: #E2E8E4;
-            --accent-color: #2C3E50;
+            --input-bg: #FFFFFF;
         }
 
-        /* DARK MODE VARIABLES */
         body.dark-mode {
-            --bg-color: #1A1B1E;      /* Dark: Deep Ink */
-            --text-color: #E8ECEF;    /* Dark: Soft Silver */
-            --header-bg: #2D3A30;     /* Dark: Deep Forest */
+            --bg-color: #1A1B1E;      /* Deep Ink */
+            --text-color: #E8ECEF;    /* Soft Silver */
+            --nav-bg: #25262B;
+            --accent: #A5D8FF;       /* Soft Blue */
             --card-bg: #25262B;
             --tag-bg: #373A40;
-            --accent-color: #A5D8FF;  /* Dark: Soft Mint/Blue */
+            --input-bg: #2C2D33;
         }
 
-        /* GENERAL STYLES */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Lexend', sans-serif;
-            background-color: var(--bg-color);
+        /* 2. GENERAL STYLES */
+        body { 
+            margin: 0; 
+            font-family: 'Lexend', sans-serif; 
+            background-color: var(--bg-color); 
             color: var(--text-color);
-            line-height: 1.6;
             transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
         }
 
-        /* BUTTONS */
-        .controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
+        /* 3. NAVIGATION */
+        nav { 
+            background: var(--nav-bg); 
+            padding: 15px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
         }
 
-        .mode-toggle {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 25px;
-            border: 1px solid white;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-family: 'Lexend', sans-serif;
-            backdrop-filter: blur(5px);
+        .nav-logo { font-weight: bold; font-size: 1.5rem; color: var(--accent); }
+        
+        .nav-links button {
+            background: none; border: none; cursor: pointer; 
+            font-family: 'Lexend', sans-serif; font-weight: 500;
+            color: var(--text-color); margin-left: 15px;
+            padding: 8px 15px; border-radius: 20px;
         }
 
-        /* HERO SECTION */
+        .nav-btn-main { background: var(--accent) !important; color: white !important; }
+
+        /* 4. HERO SECTION */
         .hero-section {
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                               url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000');
-            background-size: cover;
-            background-position: center;
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
-            padding: 0 20px;
+            background-size: cover; background-position: center; height: 300px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
+        }
+        .hero-section h1 { font-size: 3rem; margin: 0; }
+        .search-box { 
+            padding: 15px; width: 80%; max-width: 500px; 
+            border-radius: 30px; border: none; font-size: 1.1rem; 
+            margin-top: 20px; font-family: 'Lexend', sans-serif;
         }
 
-        .hero-section h1 {
-            font-size: clamp(2rem, 8vw, 3.5rem); /* Responsive size */
-            margin: 0;
-            font-weight: 500;
+        /* 5. CARDS & FORMS */
+        .main-container { max-width: 1000px; margin: auto; padding: 40px 20px; }
+        #places-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        
+        .place-card { 
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            border: 1px solid var(--tag-bg);
         }
 
-        .search-box {
-            margin-top: 25px;
-            padding: 15px 25px;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 30px;
-            border: none;
-            font-size: 1.1rem;
+        .tag { 
+            background: var(--tag-bg); 
+            color: var(--text-color); 
+            padding: 5px 10px; border-radius: 20px; 
+            font-size: 0.75rem; margin: 0 5px 8px 0; display: inline-block; 
+        }
+        
+        /* FORM STYLING */
+        .post-form-container { 
+            background: var(--card-bg); padding: 40px; 
+            border-radius: 20px; border: 1px solid var(--tag-bg); 
+        }
+        input[type="text"], select, textarea { 
+            width: 100%; padding: 12px; margin: 10px 0; 
+            border: 1px solid var(--tag-bg); border-radius: 10px; 
+            background: var(--input-bg); color: var(--text-color);
             font-family: 'Lexend', sans-serif;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-
-        /* CARD GRID */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 50px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .card-content {
-            padding: 20px;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            margin: 0 0 10px 0;
-            color: var(--accent-color);
-        }
-
-        .tag {
-            display: inline-block;
-            background-color: var(--tag-bg);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            margin: 5px 5px 0 0;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px;
-            font-size: 0.9rem;
-            opacity: 0.7;
+        .checkbox-group label {
+            display: block; margin-bottom: 10px; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <button class="mode-toggle" onclick="toggleMode()" aria-label="Toggle Dark Mode">
-            🌙 Switch Mode
-        </button>
+    <nav>
+        <div class="nav-logo">AccessifiED</div>
+        <div class="nav-links">
+            <button onclick="showView('explore')">Explore</button>
+            <button onclick="showView('post')" class="nav-btn-main">+ Add a Place</button>
+            <button onclick="toggleDarkMode()">🌙 Mode</button>
+        </div>
+    </nav>
+
+    <div id="explore-view">
+        <header class="hero-section">
+            <h1>AccessifiED</h1>
+            <p>Finding calm and accessible spaces for everyone.</p>
+            <input type="text" id="searchInput" class="search-box" placeholder="Search by name or feature...">
+        </header>
+
+        <main class="main-container">
+            <div id="places-list">
+                </div>
+        </main>
     </div>
 
-    <header class="hero-section">
-        <h1>AccessifiED</h1>
-        <p>A quiet, simple way to find accessible spaces.</p>
-        <input type="text" id="searchInput" class="search-box" placeholder="Try 'cafe' or 'park'...">
-    </header>
+    <div id="post-view" style="display: none;">
+        <div class="main-container" style="max-width: 600px;">
+            <div class="post-form-container">
+                <h2 style="color: var(--accent)">Register a New Place</h2>
+                <form id="postForm">
+                    <label>Business Name</label>
+                    <input type="text" id="name" placeholder="e.g. The Quiet Cafe" required>
+                    
+                    <p><strong>Accessibility Features:</strong></p>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="wheelchair-checkbox"> Wheelchair Accessible</label>
+                        <label><input type="checkbox" id="ASL-checkbox"> ASL Services</label>
+                        <label><input type="checkbox" id="service-animals-checkbox"> Service Animals Allowed</label>
+                        <label><input type="checkbox" id="low-sensory-checkbox"> Low Sensory Environment</label>
+                        <label><input type="checkbox" id="automatic-doors-checkbox"> Automatic Doors</label>
+                        <label><input type="checkbox" id="low-noise-checkbox"> Low Noise Level</label>
+                        <label><input type="checkbox" id="screen-readers-checkbox"> Screen Readers Supported</label>
+                    </div>
 
-    <main class="results-grid" id="cardContainer">
-        <article class="card">
-            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500" alt="Quiet cafe" class="card-img">
-            <div class="card-content">
-                <h3 class="card-title">The Quiet Bean</h3>
-                <p>Wide aisles, ramp access, and no loud background music.</p>
-                <span class="tag">Wheelchair Accessible</span>
-                <span class="tag">Low Noise</span>
+                    <label style="margin-top:20px; display:block;">Languages Spoken</label>
+                    <select id="language-select" multiple>
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Mandarin">Mandarin</option>
+                    </select>
+
+                    <input type="hidden" id="lat-input" value="40.7128">
+                    <input type="hidden" id="lng-input" value="-74.0060">
+
+                    <button type="submit" class="nav-btn-main" style="width:100%; margin-top:20px; padding: 15px; border-radius: 30px; font-size: 1.1rem; border:none; cursor:pointer;">Submit Spot</button>
+                </form>
             </div>
-        </article>
+        </div>
+    </div>
 
-        <article class="card">
-            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500" alt="Accessible park" class="card-img">
-            <div class="card-content">
-                <h3 class="card-title">Oakwood Park</h3>
-                <p>Paved trails with plenty of benches and sensory-friendly zones.</p>
-                <span class="tag">Flat Paths</span>
-                <span class="tag">Sensory Friendly</span>
-            </div>
-        </article>
-
-        <article class="card">
-            <img src="https://images.unsplash.com/photo-1521333613867-08182737bc04?w=500" alt="Library interior" class="card-img">
-            <div class="card-content">
-                <h3 class="card-title">Central Library</h3>
-                <p>Elevators to all floors and dimmable lighting in study rooms.</p>
-                <span class="tag">Elevator</span>
-                <span class="tag">Quiet Zone</span>
-            </div>
-        </article>
-    </main>
-
-    <footer>
-        <p>Built with ❤️ for Accessibility</p>
-    </footer>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        function toggleMode() {
-            document.body.classList.toggle("dark-mode");
-            const btn = document.querySelector('.mode-toggle');
-            if(document.body.classList.contains('dark-mode')) {
-                btn.innerHTML = "☀️ Light Mode";
-            } else {
-                btn.innerHTML = "🌙 Dark Mode";
-            }
+        // 1. SUPABASE CONFIG
+        const _supabase = supabase.createClient('https://gxgopzsqfhckjjqaiqye.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4Z29wenNxZmhja2pqcWFpcXllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1OTYwMDgsImV4cCI6MjA4NzE3MjAwOH0.NggJExSSWG0jNRA_twt-KJYod2fVqhs7EkTElXjspzQ');
+
+        // 2. TOGGLE DARK MODE
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
         }
 
-        // Simple Search Filter Logic
-        document.getElementById('searchInput').addEventListener('keyup', function(e) {
-            let query = e.target.value.toLowerCase();
-            let cards = document.querySelectorAll('.card');
-            
-            cards.forEach(card => {
-                let text = card.innerText.toLowerCase();
-                card.style.display = text.includes(query) ? "block" : "none";
+        // 3. VIEW SWITCHER
+        function showView(view) {
+            document.getElementById('explore-view').style.display = view === 'explore' ? 'block' : 'none';
+            document.getElementById('post-view').style.display = view === 'post' ? 'block' : 'none';
+            if(view === 'explore') loadPlaces();
+        }
+
+        // 4. LOAD PLACES
+        async function loadPlaces() {
+            const list = document.getElementById('places-list');
+            list.innerHTML = '<p style="text-align:center">Loading accessible spots...</p>';
+
+            const { data: places, error } = await _supabase.from('Places').select('*');
+            if (error) return console.error(error);
+            list.innerHTML = '';
+
+            places.forEach(p => {
+                list.innerHTML += `
+                    <div class="place-card">
+                       <h3 style="margin-top:0; color:var(--accent)">${p.name}</h3>
+                       <div style="margin: 10px 0;">
+                            ${p.wheel_chair ? '<span class="tag">Wheelchair</span>' : ''} 
+                            ${p.ASL_accessible ? '<span class="tag">ASL</span>' : ''}
+                            ${p.service_animals ? '<span class="tag">Service Animals</span>' : ''}
+                            ${p.low_sensory ? '<span class="tag">Low Sensory</span>' : ''}
+                            ${p.automatic_doors ? '<span class="tag">Auto Doors</span>' : ''}
+                            ${p.low_noise_level ? '<span class="tag">Low Noise</span>' : ''}
+                            ${p.screen_readers ? '<span class="tag">Screen Reader</span>' : ''}
+                       </div>
+                       <small style="opacity: 0.8">Languages: ${p.languages ? p.languages.join(', ') : 'None'}</small>
+                    </div>
+                `;
+            });
+        }
+
+        // 5. SEARCH FILTER
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('.place-card').forEach(card => {
+                card.style.display = card.innerText.toLowerCase().includes(query) ? "block" : "none";
             });
         });
+
+        // 6. SUBMIT FORM
+        document.getElementById('postForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Saving...';
+
+            const { error } = await _supabase.from('Places').insert([{
+                name: document.getElementById('name').value,
+                lat: 40.7128, 
+                lng: -74.0060,
+                wheel_chair: document.getElementById('wheelchair-checkbox').checked,
+                service_animals: document.getElementById('service-animals-checkbox').checked,
+                ASL_accessible: document.getElementById('ASL-checkbox').checked,
+                automatic_doors: document.getElementById('automatic-doors-checkbox').checked,
+                low_noise_level: document.getElementById('low-noise-checkbox').checked,
+                screen_readers: document.getElementById('screen-readers-checkbox').checked,
+                low_sensory: document.getElementById('low-sensory-checkbox').checked,
+                languages: Array.from(document.getElementById('language-select').selectedOptions).map(o => o.value)
+            }]);
+
+            if (error) {
+                alert("Error: " + error.message);
+                btn.innerText = originalText;
+            } else {
+                alert("Spot successfully added to AccessifiED!");
+                e.target.reset();
+                showView('explore');
+            }
+        });
+
+        loadPlaces();
     </script>
 </body>
 </html>
