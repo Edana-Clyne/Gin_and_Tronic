@@ -81,14 +81,10 @@
                         <label><input type="checkbox" id="screen-readers-checkbox"> Screen Readers Available</label><br>
                     </div>
 
-                    <label>Languages Spoken</label>
-                    <select id="language-select" multiple>
-                        <option value="English">English</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                        <option value="Hindi">Hindi</option>
-                        <option value="Mandarin">Mandarin</option>
-                    </select>
+                    <div class="input-group">
+                        <label for="language-input">Languages Spoken</label>
+                        <input type="text" id="language-input" placeholder="e.g. English, Spanish, ASL">
+                    </div>
 
                     <button type="submit" class="nav-btn-main" style="width:100%; margin-top:20px;">Submit Spot</button>
                 </form>
@@ -134,7 +130,7 @@
                             ${p.screen_readers ? '<span class="tag"> Screen Readers</span>' : ''}
                             ${p.automatic_doors ? '<span class="tag"> Automatic Doors</span>' : ''}
                         </p>
-                        <small style="color:#666">Languages: ${p.languages ? p.languages.join(', ') : 'None'}</small>
+                        <small style="color:#666">Languages: ${p.languages}</small>
                     </div>
                 `;
             });
@@ -159,8 +155,8 @@
                 written_info: document.getElementById('written-info-checkbox').checked,
                 screen_readers: document.getElementById('screen-readers-checkbox').checked,
                 low_sensory: document.getElementById('low-sensory-checkbox').checked,
-                languages: Array.from(document.getElementById('language-select').selectedOptions).map(o => o.value)
-            }]);
+                languages: document.getElementById('language-input').value // Grabs the text string
+        }]);
 
             if (error) {
                 alert(error.message);
