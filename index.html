@@ -229,6 +229,8 @@
                     <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="automatic-doors-checkbox"> Automatic Doors</label>
                     <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="low-noise-checkbox"> Low Noise Level</label>
                     <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="screen-readers-checkbox"> Screen Readers Available</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="low-interaction-checkbox"> Low Interaction</label>
+                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="written-info-checkbox"> Written Info Available</label>
                 </div>
 
                 <div class="input-group">
@@ -304,13 +306,19 @@
                     });
 
 
-                    list.innerHTML += `
-                        <div class="place-card">
-                            <h3 style="margin-top:0; color:var(--accent)">${p.name}</h3>
-                            <div>${tags}</div>
-                            <small style="opacity: 0.7; display:block; margin-top:10px;">Languages: ${p.languages ? p.languages.join(', ') : 'None'}</small>
-                        </div>
-                    `;
+                list.innerHTML += `
+                    <div class="place-card">
+                        ${p.image_url ? `<img src="${p.image_url}" style="width:100%; height:160px; object-fit:cover; border-radius:8px 8px 0 0; margin:-20px -20px 15px -20px;">` : ''}
+                        
+                        <h3 style="margin-top:0; color:var(--accent)">${p.name || 'Unknown Place'}</h3>
+                        
+                        <div>${tags}</div>
+                        
+                        <small style="opacity: 0.7; display:block; margin-top:10px;">
+                            Languages: ${p.languages || 'None listed'}
+                        </small>
+                    </div>
+                `;
                 }
             });
 
@@ -338,52 +346,55 @@
             const btn = e.target.querySelector('button');
             const originalBtnText = btn.innerText;
             btn.innerText = 'Uploading Image...';
-            btn.disabled = true; // Prevent double-clicking
+            btn.disabled = true;
 
-            // 1. Get the file from the input
             const fileInput = document.getElementById('image-upload');
-            const file = fileInput.files[0];
+            const file = fileInput?.files?.[0];
             let imageUrl = "";
 
-            // 2. Upload to Storage if a file is selected
             if (file) {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Math.random()}.${fileExt}`;
-                const filePath = `${fileName}`;
-
                 const { data: uploadData, error: uploadError } = await _supabase.storage
                     .from('place-images')
-                    .upload(filePath, file);
+                    .upload(fileName, file);
 
-                if (uploadError) {
-                    console.error("Upload Error:", uploadError);
-                    alert("Image upload failed, but we'll try to save the rest.");
-                } else {
-                    // Get the URL of the photo we just uploaded
-                    const { data } = _supabase.storage.from('place-images').getPublicUrl(filePath);
+                if (!uploadError) {
+                    const { data } = _supabase.storage.from('place-images').getPublicUrl(fileName);
                     imageUrl = data.publicUrl;
                 }
             }
 
-            // 3. Insert everything into the Table
             btn.innerText = 'Saving Details...';
             
+            // The ?. prevents "Cannot read properties of null" crashes
             const { error } = await _supabase.from('Places').insert([{
-                name: document.getElementById('name').value,
-                lat: parseFloat(document.getElementById('lat-input').value),
-                lng: parseFloat(document.getElementById('lng-input').value),
-                image_url: imageUrl, // Storing the link to the photo here
-                wheel_chair: document.getElementById('wheelchair-checkbox').checked,
-                service_animals: document.getElementById('service-animals-checkbox').checked,
-                ASL_accessible: document.getElementById('ASL-checkbox').checked,
-                automatic_doors: document.getElementById('automatic-doors-checkbox').checked,
-                low_interaction: document.getElementById('low-interaction-checkbox').checked,
-                low_noise_level: document.getElementById('low-noise-checkbox').checked,
-                written_info: document.getElementById('written-info-checkbox').checked,
-                screen_readers: document.getElementById('screen-readers-checkbox').checked,
-                low_sensory: document.getElementById('low-sensory-checkbox').checked,
-                languages: document.getElementById('language-input').value
+                name: document.getElementById('name')?.value || "Unnamed",
+                lat: parseFloat(document.getElementById('lat-input')?.value || 0),
+                lng: parseFloat(document.getElementById('lng-input')?.value || 0),
+                image_url: imageUrl,
+                wheel_chair: document.getElementById('wheelchair-checkbox')?.checked || false,
+                service_animals: document.getElementById('service-animals-checkbox')?.checked || false,
+                ASL_accessible: document.getElementById('ASL-checkbox')?.checked || false,
+                automatic_doors: document.getElementById('automatic-doors-checkbox')?.checked || false,
+                low_interaction: document.getElementById('low-interaction-checkbox')?.checked || false,
+                low_noise_level: document.getElementById('low-noise-checkbox')?.checked || false,
+                written_info: document.getElementById('written-info-checkbox')?.checked || false,
+                screen_readers: document.getElementById('screen-readers-checkbox')?.checked || false,
+                low_sensory: document.getElementById('low-sensory-checkbox')?.checked || false,
+                languages: document.getElementById('language-input')?.value || ""
             }]);
+
+            if (error) {
+                alert("Error: " + error.message);
+            } else {
+                alert("Success! Spot added.");
+                e.target.reset();
+                showView('explore');
+            }
+            btn.innerText = originalBtnText;
+            btn.disabled = false;
+        });
 
     if (error) {
         alert("Error saving to database: " + error.message);
@@ -396,8 +407,6 @@
         btn.disabled = false;
         showView('explore'); // Go back to the main screen
     }
-});
-
 
         loadPlaces();
     </script>
