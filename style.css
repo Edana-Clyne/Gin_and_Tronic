@@ -1,0 +1,5 @@
+#map {
+    height: 500px;  /* This gives the map height */
+    width: 100%;    /* This makes it span the width of the screen */
+    border: 2px solid #ccc; /* Optional: adds a border so you can see the box */
+}
