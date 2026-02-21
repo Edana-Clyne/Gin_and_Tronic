@@ -1,4 +1,4 @@
-<script>
+
     // 1. Initialize Supabase
     const _supabase = supabase.createClient('https://gxgopzsqfhckjjqaiqye.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4Z29wenNxZmhja2pqcWFpcXllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1OTYwMDgsImV4cCI6MjA4NzE3MjAwOH0.NggJExSSWG0jNRA_twt-KJYod2fVqhs7EkTElXjspzQ');
     
@@ -131,4 +131,4 @@
     }
 
     window.onload = () => { initMap(); loadPlaces(); };
-</script>
+
