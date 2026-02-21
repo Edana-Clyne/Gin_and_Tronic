@@ -4,3 +4,14 @@
     border: 2px solid #ccc; /* Optional: adds a border so you can see the box */
 }
 
+/* Force the dropdown to the very front */
+.dropdown-content {
+    z-index: 9999 !important; 
+}
+
+.dropdown-content button {
+    position: relative;
+    z-index: 10000;
+    cursor: pointer !important;
+    pointer-events: auto !important; /* Forces the mouse to recognize it */
+}
