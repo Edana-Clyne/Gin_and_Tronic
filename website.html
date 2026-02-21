@@ -15,7 +15,15 @@
             --header-bg: #7D9D85;     /* Light: Sage Green */
             --card-bg: #FFFFFF;
             --tag-bg: #E2E8E4;
-            --accent-color: #2C3E50;
+            --input-bg: #FFFFFF;
+            --border-color: #E2E8E4;
+        }
+
+        @font-face {
+            font-family: 'OpenDyslexic';
+            src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
         }
 
         /* DARK MODE VARIABLES */
@@ -35,27 +43,34 @@
             font-family: 'Lexend', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            line-height: 1.6;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.2s;
+            letter-spacing: 0.05em;   /* subtle, safe */
+            word-spacing: 0.09em;
+            line-height: 1.65;
         }
 
-        /* BUTTONS */
-        .controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
+        h1, h2, h3 {
+            letter-spacing: 0.03em;
+            line-height: 1.25;
         }
 
-        .mode-toggle {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 25px;
-            border: 1px solid white;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-family: 'Lexend', sans-serif;
-            backdrop-filter: blur(5px);
+        /* OpenDyslexic Override */
+        body.dyslexic-font {
+            font-family: 'OpenDyslexic', Arial, sans-serif !important;
+            letter-spacing: 0.05em;
+            word-spacing: 0.16em;
+            line-height: 1.8;
+        }
+
+        body.dyslexic-font * {
+            font-family: inherit !important;
+        }
+
+        body.dyslexic-font h1,
+        body.dyslexic-font h2,
+        body.dyslexic-font h3 {
+            letter-spacing: 0.04em;
+            line-height: 1.3;
         }
 
         /* HERO SECTION */
@@ -111,9 +126,12 @@
             transition: transform 0.2s;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
+        .hero-section h1 {
+            letter-spacing: 0.08em;
+            text-transform: none; /* avoid all-caps for accessibility */
         }
+
+        .high-contrast .hero-section { background-image: none !important; background-color: #000; border-bottom: 4px solid #FFFF00; }
 
         .card-img {
             width: 100%;

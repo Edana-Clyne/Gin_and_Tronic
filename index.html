@@ -8,9 +8,52 @@
 
     <!-- links for map function --> 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="style.css" />
 
-    <title>Document</title>
+    <style>
+        :root {
+            --bg-color: #F9F9F7; --text-color: #333333; --nav-bg: #FFFFFF;
+            --accent: #7D9D85; --card-bg: #FFFFFF; --tag-bg: #E2E8E4;
+            --input-bg: #FFFFFF; --sidebar-bg: #FFFFFF;
+        }
+        
+        body.dark-mode {
+            --bg-color: #1A1B1E; --text-color: #E8ECEF; --nav-bg: #25262B;
+            --accent: #A5D8FF; --card-bg: #25262B; --tag-bg: #373A40;
+            --input-bg: #2C2D33; --sidebar-bg: #25262B;
+        }
+        body { margin: 0; font-family: 'Lexend', sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: 0.3s; line-height: 1.6; }
+        
+        nav { background: var(--nav-bg); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .nav-logo { font-weight: bold; font-size: 1.5rem; color: var(--accent); cursor: pointer; }
+        .nav-links button { background: none; border: none; cursor: pointer; font-family: inherit; font-weight: 500; color: var(--text-color); margin-left: 15px; padding: 8px 15px; border-radius: 20px; transition: 0.2s; }
+        .nav-btn-main { background: var(--accent) !important; color: white !important; }
+
+        .hero-section { background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000'); background-size: cover; background-position: center; height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .search-box { padding: 15px 25px; width: 80%; max-width: 500px; border-radius: 30px; border: none; font-size: 1.1rem; margin-top: 20px; outline: none; }
+
+        #map { height: 400px; width: 90%; max-width: 1200px; margin: 30px auto; border-radius: 20px; border: 2px solid var(--tag-bg); z-index: 1; }
+        .explore-container { display: flex; max-width: 1200px; margin: auto; padding: 0 20px 40px 20px; gap: 30px; }
+        .sidebar { width: 280px; background: var(--sidebar-bg); padding: 25px; border-radius: 20px; height: fit-content; position: sticky; top: 100px; border: 1px solid var(--tag-bg); }
+        .filter-group { margin-bottom: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; }
+        
+        #places-list { flex-grow: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        .place-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid var(--tag-bg); transition: 0.2s; cursor: pointer; position: relative; }
+        .place-card:hover { transform: translateY(-5px); }
+        .card-content { padding: 20px; }
+        
+        .post-form-container { background: var(--card-bg); padding: 40px; border-radius: 20px; border: 1px solid var(--tag-bg); margin: 40px auto; max-width: 600px; }
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--tag-bg); background: var(--input-bg); color: var(--text-color); box-sizing: border-box; }
+        
+        #autocomplete-results { position: absolute; width: 100%; background: var(--card-bg); border: 1px solid var(--tag-bg); border-radius: 0 0 10px 10px; z-index: 2000; display: none; max-height: 200px; overflow-y: auto; }
+        .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--tag-bg); font-size: 0.9rem; }
+        .suggestion-item:hover { background: var(--tag-bg); }
+        
+        .delete-btn { background: #ff4d4d; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
+
+        @media (max-width: 850px) { .explore-container { flex-direction: column; } .sidebar { width: 100%; position: static; } }
+    </style>
 </head>
 <body>
     <h1>My First Heading</h1>
