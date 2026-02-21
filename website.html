@@ -228,17 +228,34 @@
             const list = document.getElementById('places-list');
             const term = document.getElementById('searchInput').value.toLowerCase();
             const activeFilters = Array.from(document.querySelectorAll('.filter:checked')).map(cb => cb.id);
+    
             list.innerHTML = '';
             markersGroup.clearLayers();
 
             allPlaces.forEach(p => {
-                const matchesSearch = p.name.toLowerCase().includes(term);
-                const matchesFilters = activeFilters.every(f => p[f] === true);
+        // 1. Check if name matches search
+                const matchesName = p.name.toLowerCase().includes(term);
 
-                if (matchesSearch && matchesFilters) {
-                    if (p.lat && p.lng) { L.marker([p.lat, p.lng]).addTo(markersGroup).bindPopup(p.name); }
+        // 2. NEW: Check if search term matches a feature
+        // This allows users to type "wheel" or "asl" into the search bar
+                const matchesFeatureSearch = 
+                    (term.includes("wheel") && p.wheel_chair) ||
+                    (term.includes("noise") && p.low_noise_level) ||
+                    (term.includes("quiet") && p.low_noise_level) ||
+                    (term.includes("animal") && p.service_animals) ||
+                    (term.includes("asl") && p.ASL_accessible) ||
+                    (term.includes("door") && p.automatic_doors) ||
+                    (term.includes("sensory") && p.low_sensory);
 
-                    // TAG LOGIC: Creates a tag for each true accessibility feature
+        // 3. Check if sidebar checkboxes are satisfied
+                const matchesSidebarFilters = activeFilters.every(f => p[f] === true);
+
+                if ((matchesName || matchesFeatureSearch || term === "") && matchesSidebarFilters) {
+                    if (p.lat && p.lng) { 
+                        L.marker([p.lat, p.lng]).addTo(markersGroup).bindPopup(p.name); 
+                    }
+
+            // Create Tags
                     let tagsHtml = '<div class="tag-container">';
                     if(p.wheel_chair) tagsHtml += '<span class="tag-item">Wheelchair</span>';
                     if(p.low_noise_level) tagsHtml += '<span class="tag-item">Quiet</span>';
@@ -257,9 +274,9 @@
                                 ${isAdmin ? `<button class="delete-btn" onclick="event.stopPropagation(); deletePlace('${p.id}')">Delete</button>` : ''}
                             </div>
                         </div>`;
-                }
-            });
         }
+    });
+}
 
         function showView(view) {
             document.getElementById('explore-view').style.display = view === 'explore' ? 'block' : 'none';
