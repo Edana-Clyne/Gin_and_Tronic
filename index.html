@@ -128,12 +128,29 @@
 
         let allPlaces = [], map, markersGroup;
 
-        function initMap() {
-            if (map) return;
-            map = L.map('map').setView([53.5461, -113.4938], 11);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            markersGroup = L.layerGroup().addTo(map);
-        }
+function initMap() {
+    if (map) return;
+
+    // Define the South-West and North-East corners of the Edmonton "box"
+    // This covers roughly 50-60km around the city center
+    const southWest = L.latLng(53.2, -114.1);
+    const northEast = L.latLng(53.9, -112.9);
+    const bounds = L.latLngBounds(southWest, northEast);
+
+    map = L.map('map', {
+        center: [53.5461, -113.4938],
+        zoom: 11,
+        minZoom: 9,               // Prevents zooming out to see the whole world
+        maxBounds: bounds,         // Sets the physical "walls"
+        maxBoundsViscosity: 1.0    // Makes the "walls" solid (snaps back instantly)
+    });
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    markersGroup = L.layerGroup().addTo(map);
+}
 
         function showView(view) {
             document.getElementById('explore-view').style.display = view === 'explore' ? 'block' : 'none';
