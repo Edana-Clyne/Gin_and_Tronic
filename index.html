@@ -51,6 +51,45 @@
         .delete-btn { background: #ff4d4d; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
 
         @media (max-width: 850px) { .explore-container { flex-direction: column; } .sidebar { width: 100%; position: static; } }
+
+        /* Better organization for the checkbox grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-color);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--tag-bg);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .feature-item:hover {
+            border-color: var(--accent);
+        }
+
+        .feature-item input {
+            width: auto !important; /* Prevents input-group styles from stretching checkboxes */
+            margin: 0;
+        }
+
+        .category-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -79,6 +118,10 @@
                 <div class="filter-group"><input type="checkbox" class="filter" id="service_animals" onchange="filterPlaces()"> <label>Service Animals</label></div>
                 <div class="filter-group"><input type="checkbox" class="filter" id="ASL_accessible" onchange="filterPlaces()"> <label>ASL Accessible</label></div>
                 <div class="filter-group"><input type="checkbox" class="filter" id="automatic_doors" onchange="filterPlaces()"> <label>Auto Doors</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="low_interaction" onchange="filterPlaces()"> <label>Low Interaction</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="written_info" onchange="filterPlaces()"> <label>Written Info</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="screen_readers" onchange="filterPlaces()"> <label>Screen Readers</label></div>  
+                <div class="filter-group"><input type="checkbox" class="filter" id="low_sensory" onchange="filterPlaces()"> <label>Low Sensory</label></div>
             </aside>
             <main id="places-list"></main>
         </div> 
@@ -116,12 +159,27 @@
                     <input type="text" id="language-input">
                 </div>
 
-                <p><strong>Accessibility Features:</strong></p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <label><input type="checkbox" id="wheel-check"> Wheelchair</label>
-                    <label><input type="checkbox" id="asl-check"> ASL Service</label>
-                    <label><input type="checkbox" id="service-check"> Service Animals</label>
-                    <label><input type="checkbox" id="noise-check"> Low Noise</label>
+                <p><strong>Accessibility Features</strong></p>
+
+                <div class="category-title">Physical Access</div>
+                <div class="features-grid">
+                    <label class="feature-item"><input type="checkbox" id="wheelchair-checkbox"> Wheelchair</label>
+                    <label class="feature-item"><input type="checkbox" id="automatic-doors-checkbox"> Auto Doors</label>
+                    <label class="feature-item"><input type="checkbox" id="service-animals-checkbox"> Service Animals</label>
+                </div>
+
+                <div class="category-title">Sensory Environment</div>
+                <div class="features-grid">
+                    <label class="feature-item"><input type="checkbox" id="low-noise-checkbox"> Low Noise</label>
+                    <label class="feature-item"><input type="checkbox" id="low-sensory-checkbox"> Low Sensory</label>
+                    <label class="feature-item"><input type="checkbox" id="low-interaction-checkbox"> Low Interaction</label>
+                </div>
+
+                <div class="category-title">Communication</div>
+                <div class="features-grid">
+                    <label class="feature-item"><input type="checkbox" id="ASL-checkbox"> ASL Staff</label>
+                    <label class="feature-item"><input type="checkbox" id="written-info-checkbox"> Written Info</label>
+                    <label class="feature-item"><input type="checkbox" id="screen-readers-checkbox"> Screen Readers</label>
                 </div>
 
                 <button type="submit" class="nav-btn-main" style="width:100%; margin-top:20px; padding: 15px; border-radius: 30px; border:none; cursor:pointer;">Submit Spot</button>
@@ -198,6 +256,24 @@
                 const matchesFilters = activeFilters.every(f => p[f] === true);
 
                 if (matchesSearch && matchesFilters) {
+                    // --- NEW: Generate Tags HTML ---
+                    const features = [
+                        { id: 'wheel_chair', label: 'Wheelchair' },
+                        { id: 'low_noise_level', label: 'Quiet' },
+                        { id: 'service_animals', label: 'Service Animals' },
+                        { id: 'ASL_accessible', label: 'ASL' },
+                        { id: 'low_sensory', label: 'Low Sensory' }
+                    ];
+
+                    let tagsHtml = '<div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;">';
+                    features.forEach(f => {
+                        if (p[f.id]) {
+                            tagsHtml += `<span style="background:var(--tag-bg); font-size:0.7rem; padding:4px 8px; border-radius:10px;">${f.label}</span>`;
+                        }
+                    });
+                    tagsHtml += '</div>';
+                    // ------------------------------
+
                     if (p.lat && p.lng) {
                         L.marker([p.lat, p.lng]).addTo(markersGroup).bindPopup(p.name);
                     }
@@ -207,7 +283,8 @@
                             ${p.image_url ? `<img src="${p.image_url}" style="width:100%; height:150px; object-fit:cover;">` : ''}
                             <div class="card-content">
                                 <h3 style="margin:0; color:var(--accent)">${p.name}</h3>
-                                <small style="display:block; margin: 5px 0;">Languages: ${p.languages || 'English'}</small>
+                                <small style="display:block; margin: 5px 0; opacity: 0.8;">Languages: ${p.languages || 'English'}</small>
+                                ${tagsHtml} 
                                 ${isAdmin ? `<button class="delete-btn" onclick="event.stopPropagation(); deletePlace('${p.id}')">Delete</button>` : ''}
                             </div>
                         </div>`;
@@ -243,40 +320,68 @@
             });
         });
 
-        // FORM SUBMISSION
-        document.getElementById('postForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.innerText = 'Uploading...';
+ // ... (previous initMap and showView code remains the same)
 
-            const file = document.getElementById('image-upload').files[0];
-            let imageUrl = "";
+// FIXED FORM SUBMISSION
+document.getElementById('postForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    const originalBtnText = btn.innerText;
+    btn.innerText = 'Uploading...';
+    btn.disabled = true;
 
-            if (file) {
-                const fileName = `${Date.now()}-${file.name}`;
-                const { data: upData, error: upErr } = await _supabase.storage.from('place-images').upload(fileName, file);
-                if (!upErr) {
-                    const { data: urlData } = _supabase.storage.from('place-images').getPublicUrl(fileName);
-                    imageUrl = urlData.publicUrl;
-                }
-            }
+    // 1. Handle Image Upload
+    const file = document.getElementById('image-upload').files[0];
+    let imageUrl = "";
 
-            const { error } = await _supabase.from('Places').insert([{
-                name: nameInput.value,
-                lat: parseFloat(document.getElementById('lat').value),
-                lng: parseFloat(document.getElementById('lng').value),
-                image_url: imageUrl,
-                languages: document.getElementById('language-input').value,
-                wheel_chair: document.getElementById('wheel-check').checked,
-                ASL_accessible: document.getElementById('asl-check').checked,
-                service_animals: document.getElementById('service-check').checked,
-                low_noise_level: document.getElementById('noise-check').checked
-            }]);
+    if (file) {
+        const fileName = `${Date.now()}-${file.name}`;
+        const { data: upData, error: upErr } = await _supabase.storage
+            .from('place-images')
+            .upload(fileName, file);
+        
+        if (!upErr) {
+            const { data: urlData } = _supabase.storage
+                .from('place-images')
+                .getPublicUrl(fileName);
+            imageUrl = urlData.publicUrl;
+        } else {
+            console.error("Upload error:", upErr);
+        }
+    }
 
-            if (error) alert(error.message);
-            else { alert("Spot Added!"); showView('explore'); }
-            btn.innerText = 'Submit Spot';
-        });
+    // 2. Prepare Data (Fixed the lat/lng and checkbox ID mismatches)
+    const placeData = {
+        name: document.getElementById('name').value,
+        lat: parseFloat(document.getElementById('lat').value),
+        lng: parseFloat(document.getElementById('lng').value),
+        image_url: imageUrl,
+        languages: document.getElementById('language-input').value,
+        wheel_chair: document.getElementById('wheelchair-checkbox').checked,
+        service_animals: document.getElementById('service-animals-checkbox').checked,
+        ASL_accessible: document.getElementById('ASL-checkbox').checked,
+        automatic_doors: document.getElementById('automatic-doors-checkbox').checked,
+        low_interaction: document.getElementById('low-interaction-checkbox').checked,
+        low_noise_level: document.getElementById('low-noise-checkbox').checked,
+        written_info: document.getElementById('written-info-checkbox').checked,
+        screen_readers: document.getElementById('screen-readers-checkbox').checked,
+        low_sensory: document.getElementById('low-sensory-checkbox').checked,
+    };
+
+    // 3. Insert to Supabase
+    const { error } = await _supabase.from('Places').insert([placeData]);
+
+    if (error) {
+        alert("Error saving spot: " + error.message);
+    } else {
+        alert("Spot Added Successfully!");
+        e.target.reset(); // Clear form
+        showView('explore');
+    }
+    
+    btn.innerText = originalBtnText;
+    btn.disabled = false;
+});
 
         window.onload = () => { initMap(); loadPlaces(); };
         function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
