@@ -47,6 +47,25 @@
         }
 
 
+        body.high-contrast input, 
+        body.high-contrast textarea, 
+        body.high-contrast select {
+            /* This makes the border always visible */
+            border: 2px solid #666666!important; 
+            background-color: #000000 !important;
+            color: #FFFF00 !important;
+        }
+
+        /* This targets the "example text" (placeholder) specifically */
+        body.high-contrast input::placeholder {
+            color: #FFFFFF !important;
+            opacity: 1; /* Ensures the white is fully visible */
+        }
+
+        /* For older browsers compatibility */
+        body.high-contrast input::-webkit-input-placeholder { color: #FFFFFF !important; }
+        body.high-contrast input::-moz-placeholder { color: #FFFFFF !important; }
+
         .place-address {
             color: #666666; /* A subtle gray */
             margin: 1px 0;
@@ -84,6 +103,7 @@
             background-color: #A5D8FF !important; /* Slightly lighter than card bg */
             color: #000000 !important;           /* Light blue text for contrast */
         }
+
 
 .sidebar {
     background: var(--sidebar-bg);
