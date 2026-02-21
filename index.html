@@ -4,173 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AccessifiED | Find Accessible Places</title>
-   
+    
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;500&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
-        /* 1. COLOR THEMES (Low Sensory Palette) */
         :root {
-            --bg-color: #F9F9F7;
-            --text-color: #333333;
-            --nav-bg: #FFFFFF;
-            --accent: #7D9D85;
-            --card-bg: #FFFFFF;
-            --tag-bg: #E2E8E4;
-            --input-bg: #FFFFFF;
-            --sidebar-bg: #FFFFFF;
+            --bg-color: #F9F9F7; --text-color: #333333; --nav-bg: #FFFFFF;
+            --accent: #7D9D85; --card-bg: #FFFFFF; --tag-bg: #E2E8E4;
+            --input-bg: #FFFFFF; --sidebar-bg: #FFFFFF;
         }
-
-
         body.dark-mode {
-            --bg-color: #1A1B1E;
-            --text-color: #E8ECEF;
-            --nav-bg: #25262B;
-            --accent: #A5D8FF;
-            --card-bg: #25262B;
-            --tag-bg: #373A40;
-            --input-bg: #2C2D33;
-            --sidebar-bg: #25262B;
+            --bg-color: #1A1B1E; --text-color: #E8ECEF; --nav-bg: #25262B;
+            --accent: #A5D8FF; --card-bg: #25262B; --tag-bg: #373A40;
+            --input-bg: #2C2D33; --sidebar-bg: #25262B;
         }
-
-
-        body {
-            margin: 0;
-            font-family: 'Lexend', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-            line-height: 1.6;
-        }
-
-
-        /* 2. NAVIGATION */
-        nav {
-            background: var(--nav-bg);
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-
+        body { margin: 0; font-family: 'Lexend', sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: 0.3s; line-height: 1.6; }
+        
+        nav { background: var(--nav-bg); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .nav-logo { font-weight: bold; font-size: 1.5rem; color: var(--accent); }
-        .nav-links button {
-            background: none; border: none; cursor: pointer;
-            font-family: 'Lexend', sans-serif; font-weight: 500;
-            color: var(--text-color); margin-left: 15px;
-            padding: 8px 15px; border-radius: 20px;
-            transition: 0.2s;
-        }
+        .nav-links button { background: none; border: none; cursor: pointer; font-family: inherit; font-weight: 500; color: var(--text-color); margin-left: 15px; padding: 8px 15px; border-radius: 20px; transition: 0.2s; }
         .nav-btn-main { background: var(--accent) !important; color: white !important; }
 
+        .hero-section { background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000'); background-size: cover; background-position: center; height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .search-box { padding: 15px 25px; width: 80%; max-width: 500px; border-radius: 30px; border: none; font-size: 1.1rem; margin-top: 20px; outline: none; }
 
-        /* 3. HERO SECTION */
-        .hero-section {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-                              url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000');
-            background-size: cover; background-position: center; height: 300px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
-        }
-        .hero-section h1 { font-size: 3rem; margin: 0; }
-        .search-box {
-            padding: 15px 25px; width: 80%; max-width: 500px;
-            border-radius: 30px; border: none; font-size: 1.1rem;
-            margin-top: 20px; font-family: 'Lexend', sans-serif;
-            outline: none;
-        }
-
-
-        /* 4. EXPLORE VIEW LAYOUT */
-        .explore-container {
-            display: flex;
-            max-width: 1200px;
-            margin: auto;
-            padding: 40px 20px;
-            gap: 30px;
-        }
-
-
-        /* 5. SIDEBAR */
-        .sidebar {
-            width: 280px;
-            background: var(--sidebar-bg);
-            padding: 25px;
-            border-radius: 20px;
-            height: fit-content;
-            position: sticky;
-            top: 100px;
-            border: 1px solid var(--tag-bg);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-
-
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-
-        .clear-btn {
-            background: none; border: none; color: var(--accent);
-            cursor: pointer; font-family: 'Lexend'; font-size: 0.8rem; text-decoration: underline;
-        }
-
-
-        .filter-group {
-            margin-bottom: 15px; display: flex; align-items: center; gap: 12px;
-            cursor: pointer; font-size: 0.9rem;
-        }
-
-
-        input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; }
-
-
-        /* 6. PLACES LIST & CARDS */
+        #map { height: 400px; width: 90%; max-width: 1200px; margin: 30px auto; border-radius: 20px; border: 2px solid var(--tag-bg); z-index: 1; }
+        .explore-container { display: flex; max-width: 1200px; margin: auto; padding: 0 20px 40px 20px; gap: 30px; }
+        .sidebar { width: 280px; background: var(--sidebar-bg); padding: 25px; border-radius: 20px; height: fit-content; position: sticky; top: 100px; border: 1px solid var(--tag-bg); }
+        .filter-group { margin-bottom: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; }
+        
         #places-list { flex-grow: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
-       
-        .place-card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid var(--tag-bg);
-            transition: transform 0.2s;
-        }
+        .place-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid var(--tag-bg); transition: 0.2s; cursor: pointer; }
         .place-card:hover { transform: translateY(-5px); }
+        .card-content { padding: 20px; }
+        .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 15px; font-size: 0.7rem; margin: 0 4px 6px 0; display: inline-block; }
 
-
-        .tag {
-            background: var(--tag-bg);
-            color: var(--text-color);
-            padding: 5px 12px; border-radius: 20px;
-            font-size: 0.7rem; margin: 0 5px 8px 0; display: inline-block;
-            text-transform: capitalize;
-        }
-
-
-        /* 7. POST FORM */
-        .post-form-container {
-            background: var(--card-bg); padding: 40px;
-            border-radius: 20px; border: 1px solid var(--tag-bg);
-            margin: 40px auto; max-width: 600px;
-        }
-
-
-        @media (max-width: 850px) {
-            .explore-container { flex-direction: column; }
-            .sidebar { width: 100%; position: static; box-sizing: border-box; }
-        }
+        .post-form-container { background: var(--card-bg); padding: 40px; border-radius: 20px; border: 1px solid var(--tag-bg); margin: 40px auto; max-width: 600px; }
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--tag-bg); background: var(--input-bg); color: var(--text-color); box-sizing: border-box; }
+        
+        #autocomplete-results { position: absolute; width: 100%; background: var(--card-bg); border: 1px solid var(--tag-bg); border-radius: 0 0 10px 10px; z-index: 2000; display: none; max-height: 200px; overflow-y: auto; }
+        .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--tag-bg); font-size: 0.9rem; }
+        .suggestion-item:hover { background: var(--tag-bg); }
+        
+        @media (max-width: 850px) { .explore-container { flex-direction: column; } .sidebar { width: 100%; position: static; } }
     </style>
 </head>
 <body>
-
 
     <nav>
         <div class="nav-logo">AccessifiED</div>
@@ -181,7 +63,6 @@
         </div>
     </nav>
 
-
     <div id="explore-view">
         <header class="hero-section">
             <h1>AccessifiED</h1>
@@ -189,226 +70,175 @@
             <input type="text" id="searchInput" class="search-box" placeholder="Search by name or feature..." onkeyup="filterPlaces()">
         </header>
 
-
         <div class="explore-container">
             <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h3 style="margin:0">Filters</h3>
-                    <button class="clear-btn" onclick="clearFilters()">Clear All</button>
-                </div>
-               
-                <div class="filter-group"><input type="checkbox" class="filter" id="wheel_chair"> <label for="wheel_chair">Wheelchair Access</label></div>
-                <div class="filter-group"><input type="checkbox" class="filter" id="low_noise_level"> <label for="low_noise_level">Low Noise Level</label></div>
-                <div class="filter-group"><input type="checkbox" class="filter" id="service_animals"> <label for="service_animals">Service Animals</label></div>
-                <div class="filter-group"><input type="checkbox" class="filter" id="ASL_accessible"> <label for="ASL_accessible">ASL Accessible</label></div>
-                <div class="filter-group"><input type="checkbox" class="filter" id="automatic_doors"> <label for="automatic_doors">Automatic Doors</label></div>
-                <div class="filter-group"><input type="checkbox" class="filter" id="low_sensory"> <label for="low_sensory">Low Sensory</label></div>
-                <div class="filter-group"><input type="checkbox" class="filter" id="screen_readers"> <label for="screen_readers">Screen Readers</label></div>
+                <h3>Filters</h3>
+                <div class="filter-group"><input type="checkbox" class="filter" id="wheel_chair"> <label>Wheelchair Access</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="low_noise_level"> <label>Low Noise</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="service_animals"> <label>Service Animals</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="ASL_accessible"> <label>ASL Accessible</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="automatic_doors"> <label>Auto Doors</label></div>
             </aside>
-
-
-            <main id="places-list">
-                </main>
+            <main id="places-list"></main>
         </div>
+        <div id="map"></div>
     </div>
-
 
     <div id="post-view" style="display: none;">
         <div class="post-form-container">
             <h2 style="color: var(--accent); margin-top:0;">Register a New Place</h2>
             <form id="postForm">
-                <label>Business Name</label>
-                <input type="text" id="name" placeholder="e.g. The Quiet Cafe" required style="width:100%; padding:12px; margin:10px 0; border-radius:10px; border:1px solid var(--tag-bg); background:var(--input-bg); color:var(--text-color); font-family:inherit;">
-               
-                <p><strong>Accessibility Features:</strong></p>
-                <div class="checkbox-group">
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="wheelchair-checkbox"> Wheelchair Accessible</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="ASL-checkbox"> ASL Services</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="service-animals-checkbox"> Service Animals Allowed</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="low-sensory-checkbox"> Low Sensory Environment</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="automatic-doors-checkbox"> Automatic Doors</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="low-noise-checkbox"> Low Noise Level</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="screen-readers-checkbox"> Screen Readers Available</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="low-interaction-checkbox"> Low Interaction</label>
-                    <label style="display:block; margin-bottom:8px;"><input type="checkbox" id="written-info-checkbox"> Written Info Available</label>
+                <div class="input-group">
+                    <label>Business Name (Search for suggestions)</label>
+                    <input type="text" id="name" placeholder="Start typing name..." required autocomplete="off">
+                    <div id="autocomplete-results"></div>
                 </div>
 
-                <div class="input-group">
-                    <label for="language-input">Languages Spoken</label>
-                    <input type="text" id="language-input" placeholder="e.g. English, Spanish, ASL">
-                </div>
+                <input type="hidden" id="lat">
+                <input type="hidden" id="lng">
 
                 <div class="input-group">
-                    <label for="image-upload">Upload a Photo of the Entrance</label>
+                    <label>Entrance Photo</label>
                     <input type="file" id="image-upload" accept="image/*">
                 </div>
 
+                <div class="input-group">
+                    <label>Languages Spoken (e.g. English, ASL)</label>
+                    <input type="text" id="language-input">
+                </div>
 
-                <button type="submit" class="nav-btn-main" style="width:100%; margin-top:20px; padding: 15px; border-radius: 30px; font-size: 1.1rem; border:none; cursor:pointer; font-family:inherit;">Submit Spot</button>
+                <p><strong>Accessibility Features:</strong></p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <label><input type="checkbox" id="wheel-check"> Wheelchair</label>
+                    <label><input type="checkbox" id="asl-check"> ASL Service</label>
+                    <label><input type="checkbox" id="service-check"> Service Animals</label>
+                    <label><input type="checkbox" id="noise-check"> Low Noise</label>
+                </div>
+
+                <button type="submit" class="nav-btn-main" style="width:100%; margin-top:20px; padding: 15px; border-radius: 30px; border:none; cursor:pointer;">Submit Spot</button>
             </form>
         </div>
     </div>
 
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
         const _supabase = supabase.createClient('https://gxgopzsqfhckjjqaiqye.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4Z29wenNxZmhja2pqcWFpcXllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1OTYwMDgsImV4cCI6MjA4NzE3MjAwOH0.NggJExSSWG0jNRA_twt-KJYod2fVqhs7EkTElXjspzQ');
 
+        let allPlaces = [], map, markersGroup;
 
-        let allPlaces = [];
-
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
+        function initMap() {
+            if (map) return;
+            map = L.map('map').setView([53.5461, -113.4938], 11);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            markersGroup = L.layerGroup().addTo(map);
         }
-
 
         function showView(view) {
             document.getElementById('explore-view').style.display = view === 'explore' ? 'block' : 'none';
             document.getElementById('post-view').style.display = view === 'post' ? 'block' : 'none';
-            if(view === 'explore') loadPlaces();
+            if(view === 'explore') { initMap(); loadPlaces(); }
         }
-
 
         async function loadPlaces() {
-            const list = document.getElementById('places-list');
-            list.innerHTML = '<p style="text-align:center">Loading...</p>';
-
-
             const { data, error } = await _supabase.from('Places').select('*');
-            if (error) return console.error(error);
-           
-            allPlaces = data;
-            filterPlaces();
+            if (!error) { allPlaces = data; filterPlaces(); }
         }
-
 
         function filterPlaces() {
             const list = document.getElementById('places-list');
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const term = document.getElementById('searchInput').value.toLowerCase();
             const activeFilters = Array.from(document.querySelectorAll('.filter:checked')).map(cb => cb.id);
-
-
+            
             list.innerHTML = '';
-
+            markersGroup.clearLayers();
 
             allPlaces.forEach(p => {
-                const matchesSearch = p.name.toLowerCase().includes(searchTerm);
-                const matchesFilters = activeFilters.every(filterId => p[filterId] === true);
-
+                const matchesSearch = p.name.toLowerCase().includes(term);
+                const matchesFilters = activeFilters.every(f => p[f] === true);
 
                 if (matchesSearch && matchesFilters) {
-                    let tags = '';
-                    const features = ['wheel_chair', 'ASL_accessible', 'service_animals', 'low_sensory', 'automatic_doors', 'low_noise_level', 'screen_readers'];
-                   
-                    features.forEach(f => {
-                        if (p[f]) tags += `<span class="tag">${f.replace(/_/g, ' ')}</span>`;
-                    });
-
-
-                list.innerHTML += `
-                    <div class="place-card">
-                        ${p.image_url ? `<img src="${p.image_url}" style="width:100%; height:160px; object-fit:cover; border-radius:8px 8px 0 0; margin:-20px -20px 15px -20px;">` : ''}
-                        
-                        <h3 style="margin-top:0; color:var(--accent)">${p.name || 'Unknown Place'}</h3>
-                        
-                        <div>${tags}</div>
-                        
-                        <small style="opacity: 0.7; display:block; margin-top:10px;">
-                            Languages: ${p.languages || 'None listed'}
-                        </small>
-                    </div>
-                `;
+                    if (p.lat && p.lng) {
+                        L.marker([p.lat, p.lng]).addTo(markersGroup).bindPopup(p.name);
+                    }
+                    
+                    list.innerHTML += `
+                        <div class="place-card" onclick="document.getElementById('map').scrollIntoView({behavior:'smooth'}); map.flyTo([${p.lat}, ${p.lng}], 15)">
+                            ${p.image_url ? `<img src="${p.image_url}" style="width:100%; height:150px; object-fit:cover;">` : ''}
+                            <div class="card-content">
+                                <h3 style="margin:0; color:var(--accent)">${p.name}</h3>
+                                <small style="display:block; margin: 5px 0;">Languages: ${p.languages || 'English'}</small>
+                            </div>
+                        </div>`;
                 }
             });
-
-
-            if(list.innerHTML === '') list.innerHTML = '<p>No spots match your filters.</p>';
         }
 
+        // AUTOCOMPLETE LOGIC
+        const nameInput = document.getElementById('name');
+        const resDiv = document.getElementById('autocomplete-results');
 
-        function clearFilters() {
-            document.querySelectorAll('.filter').forEach(cb => cb.checked = false);
-            document.getElementById('searchInput').value = '';
-            filterPlaces();
-        }
+        nameInput.addEventListener('input', async (e) => {
+            const query = e.target.value;
+            if (query.length < 3) return resDiv.style.display = 'none';
 
+            const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&viewbox=-113.7,53.7,-113.3,53.4&bounded=1&limit=5`);
+            const data = await resp.json();
 
-        // Event listener for sidebar checkboxes
-        document.addEventListener('change', (e) => {
-            if (e.target.classList.contains('filter')) filterPlaces();
+            resDiv.innerHTML = '';
+            resDiv.style.display = 'block';
+            data.forEach(place => {
+                const d = document.createElement('div');
+                d.className = 'suggestion-item';
+                d.innerText = place.display_name;
+                d.onclick = () => {
+                    nameInput.value = place.display_name.split(',')[0];
+                    document.getElementById('lat').value = place.lat;
+                    document.getElementById('lng').value = place.lon;
+                    resDiv.style.display = 'none';
+                };
+                resDiv.appendChild(d);
+            });
         });
 
-
-        // Handle form submission
+        // FORM SUBMISSION WITH IMAGE
         document.getElementById('postForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
-            const originalBtnText = btn.innerText;
-            btn.innerText = 'Uploading Image...';
-            btn.disabled = true;
+            btn.innerText = 'Uploading...';
 
-            const fileInput = document.getElementById('image-upload');
-            const file = fileInput?.files?.[0];
+            const file = document.getElementById('image-upload').files[0];
             let imageUrl = "";
 
             if (file) {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Math.random()}.${fileExt}`;
-                const { data: uploadData, error: uploadError } = await _supabase.storage
-                    .from('place-images')
-                    .upload(fileName, file);
-
-                if (!uploadError) {
-                    const { data } = _supabase.storage.from('place-images').getPublicUrl(fileName);
-                    imageUrl = data.publicUrl;
+                const fileName = `${Date.now()}-${file.name}`;
+                const { data: upData, error: upErr } = await _supabase.storage.from('place-images').upload(fileName, file);
+                if (!upErr) {
+                    const { data: urlData } = _supabase.storage.from('place-images').getPublicUrl(fileName);
+                    imageUrl = urlData.publicUrl;
                 }
             }
 
-            btn.innerText = 'Saving Details...';
-            
-            // The ?. prevents "Cannot read properties of null" crashes
             const { error } = await _supabase.from('Places').insert([{
-                name: document.getElementById('name')?.value || "Unnamed",
-                lat: parseFloat(document.getElementById('lat-input')?.value || 0),
-                lng: parseFloat(document.getElementById('lng-input')?.value || 0),
+                name: nameInput.value,
+                lat: parseFloat(document.getElementById('lat').value),
+                lng: parseFloat(document.getElementById('lng').value),
                 image_url: imageUrl,
-                wheel_chair: document.getElementById('wheelchair-checkbox')?.checked || false,
-                service_animals: document.getElementById('service-animals-checkbox')?.checked || false,
-                ASL_accessible: document.getElementById('ASL-checkbox')?.checked || false,
-                automatic_doors: document.getElementById('automatic-doors-checkbox')?.checked || false,
-                low_interaction: document.getElementById('low-interaction-checkbox')?.checked || false,
-                low_noise_level: document.getElementById('low-noise-checkbox')?.checked || false,
-                written_info: document.getElementById('written-info-checkbox')?.checked || false,
-                screen_readers: document.getElementById('screen-readers-checkbox')?.checked || false,
-                low_sensory: document.getElementById('low-sensory-checkbox')?.checked || false,
-                languages: document.getElementById('language-input')?.value || ""
+                languages: document.getElementById('language-input').value,
+                wheel_chair: document.getElementById('wheel-check').checked,
+                ASL_accessible: document.getElementById('asl-check').checked,
+                service_animals: document.getElementById('service-check').checked,
+                low_noise_level: document.getElementById('noise-check').checked
             }]);
 
-            if (error) {
-                alert("Error: " + error.message);
-            } else {
-                alert("Success! Spot added.");
-                e.target.reset();
-                showView('explore');
-            }
-            btn.innerText = originalBtnText;
-            btn.disabled = false;
+            if (error) alert(error.message);
+            else { alert("Spot Added!"); showView('explore'); }
+            btn.innerText = 'Submit Spot';
         });
 
-    if (error) {
-        alert("Error saving to database: " + error.message);
-        btn.innerText = originalBtnText;
-        btn.disabled = false;
-    } else {
-        alert("Success! Spot added.");
-        e.target.reset();
-        btn.innerText = originalBtnText;
-        btn.disabled = false;
-        showView('explore'); // Go back to the main screen
-    }
-
-        loadPlaces();
+        window.onload = () => { initMap(); loadPlaces(); };
+        function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
     </script>
 </body>
 </html>
