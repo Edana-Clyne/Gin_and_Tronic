@@ -203,10 +203,10 @@
             background: #000000 !important;      
         }
 
-      /*  body.high-contrast #clear-filters-btn:hover {
+        body.high-contrast #clear-filters-btn:hover {
             background: #FFFF00 !important;      
             color: #000000 !important;
-        } */
+        }
         
         #places-list {flex-grow: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; align-items: start; margin-top: 40px; padding: 0 20px 40px 20px;}
 
@@ -245,6 +245,7 @@
             padding-top: 10px;
             border-top: 1px solid var(--tag-bg);
         }
+        
         .vote-btn {
             background: var(--tag-bg);
             border: none;
@@ -298,8 +299,7 @@
             color: #FFFF00 !important;
             border-bottom: 1px solid #FFFF00;
         }
-        .delete-btn { background: #ff4d4d; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
-
+        
         @media (max-width: 850px) { .explore-container { flex-direction: column; } .sidebar { width: 100%; position: static; } }
 
         .features-grid {
@@ -363,7 +363,7 @@
     <div id="explore-view">
         <header class="hero-section">
             <h1>AccessifiED</h1>
-            <p>Finding calm and accessible spaces for everyone.</p>
+            <p>Finding accessible spaces for everyone.</p>
             <input type="text" id="searchInput" class="search-box" placeholder="Search by name" onkeyup="filterPlaces()">
         </header>
 
@@ -542,22 +542,6 @@
             markersGroup = L.layerGroup().addTo(map);
         }
 
-        function adminLogin() {
-            const pass = prompt("Enter Admin Password:");
-            if (pass === "EDMONTON2026") {
-                isAdmin = true;
-                alert("Admin Mode Active.");
-                filterPlaces();
-            }
-        }
-
-        async function deletePlace(id) {
-            if (!confirm("Are you sure you want to delete this business?")) return;
-            const { error } = await _supabase.from('Places').delete().eq('id', id);
-            if (error) alert("Error: " + error.message);
-            else loadPlaces();
-        }
-
         function showView(view) {
             document.getElementById('explore-view').style.display = view === 'explore' ? 'block' : 'none';
             document.getElementById('post-view').style.display = view === 'post' ? 'block' : 'none';
@@ -654,7 +638,6 @@
                                         👎 ${p.dislikes || 0}
                                     </button>
                                 </div>
-                                ${isAdmin ? `<button class="delete-btn" onclick="event.stopPropagation(); deletePlace('${p.id}')">Delete</button>` : ''}
                             </div>
                         </div>`;
                 }
