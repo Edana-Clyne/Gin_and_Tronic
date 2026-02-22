@@ -3,8 +3,8 @@
 AccessifiED | Accessible Spaces Explorer
 AccessifiED is a community-driven web application designed to help people—particularly those with mobility, sensory, or cognitive needs—find and share accessible local businesses. By focusing on detailed accessibility metadata and user-verified voting, we aim to make navigating the city more predictable and inclusive.
 
-🚀 Key Features
-🔍 Discovery & Filtering
+ Key Features
+ Discovery & Filtering
 Dynamic Map: Integrated Leaflet.js map with custom markers for business locations.
 
 Smart Search: Real-time search by business name.
@@ -17,7 +17,7 @@ Sensory: Low noise, Low sensory environment, Low interaction.
 
 Communication: ASL-trained staff, Written info, Screen reader compatibility.
 
-♿ Accessibility First (Built-in)
+ Accessibility First (Built-in)
 Read Aloud Mode: Text-to-speech integration for users with visual impairments.
 
 Dyslexic Font: A toggleable font-style to assist users with dyslexia.
@@ -25,13 +25,12 @@ Dyslexic Font: A toggleable font-style to assist users with dyslexia.
 High Contrast & Dark Mode: Specialized themes for light sensitivity and visual clarity.
 
 Responsive Scaling: User-controlled text sizing from 14px to 32px.
-
-✍️ Community Contribution
+Community Contribution
 Add a Place: A simple form to register new locations using the Nominatim (OpenStreetMap) API for address autocomplete.
 
 User Verification: A "Did you find this place accessible?" voting system (👍/👎) allows the community to verify business claims.
 
-🛠️ Tech Stack
+ Tech Stack
 Frontend: HTML5, CSS3, Vanilla JavaScript.
 
 Typography: Lexend (Designed to reduce visual noise) and OpenDyslexic.
@@ -42,7 +41,7 @@ Backend & Database: Supabase (PostgreSQL + Storage for image uploads).
 
 Geocoding: Nominatim API.
 
-📖 Database Schema
+ Database Schema
 The application relies on a Supabase table named Places with the following key columns:
 
 name (Text)
@@ -82,3 +81,4 @@ Push to the Branch (git push origin feature/AmazingFeature).
 Open a Pull Request.
 
 Built with ❤️ for a more accessible world.
+
