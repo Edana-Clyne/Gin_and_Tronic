@@ -2,54 +2,328 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AccessifiED | Find Accessible Places</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
-        /* 1. The Main Header Container */
-        .hero-section {
-            /* Replace the URL below with your own image link later! */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-                              url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000');
-            background-size: cover;
-            background-position: center;
-            height: 400px; /* How tall the header is */
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Centers vertically */
-            align-items: center;     /* Centers horizontally */
-            color: white;            /* Makes text white to stand out */
-            font-family: Arial, sans-serif;
+        /* 1. THEME VARIABLES */
+        :root {
+            --bg-color: #F9F9F7; --text-color: #333333; --nav-bg: #FFFFFF;
+            --accent: #7D9D85; --card-bg: #FFFFFF; --tag-bg: #E2E8E4;
+            --input-bg: #FFFFFF; --border-color: #E2E8E4;
         }
 
-        /* 2. Styling the Title */
-        .hero-section h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Makes it readable over images */
+        @font-face {
+            font-family: 'OpenDyslexic';
+            src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff') format('woff');
+            font-weight: normal; font-style: normal;
         }
 
-        /* 3. The Search Bar (Optional but very Yelp-like!) */
-        .search-box {
-            padding: 15px;
-            width: 60%;
-            border-radius: 5px;
-            border: none;
-            font-size: 1.1rem;
+        body.dark-mode {
+            --bg-color: #1A1B1E; --text-color: #E8ECEF; --nav-bg: #25262B;
+            --accent: #A5D8FF; --card-bg: #25262B; --tag-bg: #373A40;
+            --input-bg: #2C2D33; --border-color: #373A40;
         }
+
+        body.high-contrast {
+            --bg-color: #000000; --text-color: #FFFF00; --nav-bg: #000000;
+            --accent: #FFFF00; --card-bg: #000000; --tag-bg: #000000;
+            --input-bg: #000000; --border-color: #FFFF00;
+        }
+
+        /* 2. GLOBAL STYLES */
+        html { font-size: 16px; } 
+
+        body {
+            margin: 0; font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            transition: 0.2s; line-height: 1.65; letter-spacing: 0.020em;
+            min-height: 100vh;
+        }
+
+        body.dyslexic-font, body.dyslexic-font * {
+            font-family: 'OpenDyslexic', Arial, sans-serif !important;
+        }
+
+        /* 3. NAVIGATION & DROPDOWN */
+        nav {
+            background: var(--nav-bg); padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 2000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-logo { font-weight: bold; font-size: 1.5rem; color: var(--accent); cursor: pointer; }
+        .nav-links { display: flex; align-items: center; gap: 10px; }
+        .nav-links button, .dropbtn {
+            background: none; border: none; cursor: pointer;
+            font-family: inherit; font-weight: 500;
+            color: var(--text-color); padding: 8px 15px; border-radius: 20px;
+        }
+        .nav-btn-main { background: var(--accent) !important; color: white !important; }
+
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { border: 1px solid var(--accent) !important; }
+        .dropdown-content {
+            display: none; position: absolute; right: 0;
+            background-color: var(--card-bg); min-width: 240px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 3000;
+            border-radius: 12px; padding: 15px; border: 1px solid var(--border-color);
+        }
+        .dropdown-content.show { display: block; }
+        .menu-label { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; margin: 10px 0 5px; opacity: 0.8; }
+        .dropdown-content button { width: 100%; text-align: left; margin-bottom: 5px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); }
+
+        /* 4. CONTENT STYLES */
+        .hero-section { background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000'); background-size: cover; background-position: center; min-height: 250px; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; }
+        .search-box { padding: 15px 25px; width: 80%; max-width: 500px; border-radius: 30px; border: none; font-size: 1.1rem; margin-top: 20px; outline: none; }
+        
+        #map { height: 400px; width: 90%; max-width: 1200px; margin: 30px auto; border-radius: 20px; border: 2px solid var(--tag-bg); z-index: 1; }
+        
+        .explore-container { display: flex; max-width: 1200px; margin: auto; padding: 0 20px 40px 20px; gap: 30px; }
+        .sidebar { width: 280px; background: var(--card-bg); padding: 25px; border-radius: 20px; height: fit-content; position: sticky; top: 100px; border: 1px solid var(--tag-bg); }
+        .filter-group { margin-bottom: 12px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        
+        #places-list { flex-grow: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; align-items: start; }
+        
+        .place-card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid var(--tag-bg); transition: 0.2s; cursor: pointer; display: flex; flex-direction: column; height: auto; }
+        .place-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .card-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+        
+        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .tag-item { background: var(--tag-bg); font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: 500; border: 1px solid transparent; }
+        body.high-contrast .tag-item { border-color: var(--accent); }
+
+        .post-form-container { background: var(--card-bg); padding: 40px; border-radius: 20px; border: 1px solid var(--tag-bg); margin: 40px auto; max-width: 600px; }
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--tag-bg); background: var(--input-bg); color: var(--text-color); box-sizing: border-box; }
+        
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .feature-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
+
+        .delete-btn { background: #ff4d4d; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
+        
+        @media (max-width: 850px) { .explore-container { flex-direction: column; } .sidebar { width: 100%; position: static; } }
     </style>
 </head>
 <body>
 
-    <header class="hero-section">
-        <h1>AccessifiED</h1>
-        <p>Search for wheelchair-accessible cafes, parks, and more.</p>
-        
-        <input type="text" class="search-box" placeholder="Find cafes, restaurants, ramps...">
-    </header>
+    <nav>
+        <div class="nav-logo" onclick="adminLogin()">AccessifiED</div>
+        <div class="nav-links">
+            <button onclick="showView('explore')">Explore</button>
+            <button onclick="showView('post')" class="nav-btn-main">+ Add a Place</button>
+            <div class="dropdown">
+                <button class="dropbtn" onclick="toggleDropdown()">⚙️ Settings</button>
+                <div id="acc-menu" class="dropdown-content">
+                    <p class="menu-label">Theme</p>
+                    <button onclick="setTheme('light')">☀️ Light Mode</button>
+                    <button onclick="setTheme('dark')">🌙 Dark Mode</button>
+                    <button onclick="setTheme('high-contrast')">👁️ High Contrast</button>
+                    <hr>
+                    <p class="menu-label">Reading</p>
+                    <button onclick="toggleDyslexicFont()" id="dyslexicBtn">Dyslexic Font: Off</button>
+                    <hr>
+                    <p class="menu-label">Text Size</p>
+                    <input type="range" min="14" max="32" value="16" oninput="changeTextSize(this.value)">
+                </div>
+            </div>
+        </div>
+    </nav>
 
-    <main style="padding: 20px; text-align: center;">
-        <h2>Explore Nearby Places</h2>
-        <p>Your content for accessible locations will go here!</p>
-    </main>
+    <div id="explore-view">
+        <header class="hero-section">
+            <h1>AccessifiED</h1>
+            <p>Finding calm and accessible spaces for everyone.</p>
+            <input type="text" id="searchInput" class="search-box" placeholder="Search by name or feature (e.g. wheelchair)..." onkeyup="filterPlaces()">
+        </header>
 
+        <div class="explore-container">
+            <aside class="sidebar">
+                <h3>Filters</h3>
+                <div class="filter-group"><input type="checkbox" class="filter" id="wheel_chair" onchange="filterPlaces()"> <label>Wheelchair Access</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="low_noise_level" onchange="filterPlaces()"> <label>Low Noise</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="service_animals" onchange="filterPlaces()"> <label>Service Animals</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="ASL_accessible" onchange="filterPlaces()"> <label>ASL Accessible</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="automatic_doors" onchange="filterPlaces()"> <label>Auto Doors</label></div>
+                <div class="filter-group"><input type="checkbox" class="filter" id="low_sensory" onchange="filterPlaces()"> <label>Low Sensory</label></div>
+            </aside>
+            <main id="places-list"></main>
+        </div> 
+        <div id="map"></div>
+    </div>
+
+    <div id="post-view" style="display: none;">
+        <div class="post-form-container">
+            <h2>Register a New Place</h2>
+            <form id="postForm">
+                <div class="input-group">
+                    <label>Business Name</label>
+                    <input type="text" id="name" placeholder="Business name..." required>
+                </div>
+                <div class="input-group">
+                    <label>Address</label>
+                    <input type="text" id="address-input" placeholder="123 Street, Edmonton" required>
+                </div>
+                <input type="hidden" id="lat" value="53.5461"> 
+                <input type="hidden" id="lng" value="-113.4938">
+
+                <div class="input-group"><label>Entrance Photo</label><input type="file" id="image-upload" accept="image/*"></div>
+                
+                <p><strong>Accessibility Features</strong></p>
+                <div class="features-grid">
+                    <label class="feature-item"><input type="checkbox" id="wheelchair-checkbox"> Wheelchair</label>
+                    <label class="feature-item"><input type="checkbox" id="service-animals-checkbox"> Service Animals</label>
+                    <label class="feature-item"><input type="checkbox" id="ASL-checkbox"> ASL Staff</label>
+                    <label class="feature-item"><input type="checkbox" id="low-noise-checkbox"> Low Noise</label>
+                    <label class="feature-item"><input type="checkbox" id="low-sensory-checkbox"> Low Sensory</label>
+                    <label class="feature-item"><input type="checkbox" id="automatic-doors-checkbox"> Auto Doors</label>
+                </div>
+                <button type="submit" id="submitBtn" class="nav-btn-main" style="width:100%; margin-top:20px; padding:15px; border-radius:30px; border:none; cursor:pointer;">Submit Spot</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const _supabase = supabase.createClient('https://gxgopzsqfhckjjqaiqye.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4Z29wenNxZmhja2pqcWFpcXllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1OTYwMDgsImV4cCI6MjA4NzE3MjAwOH0.NggJExSSWG0jNRA_twt-KJYod2fVqhs7EkTElXjspzQ');
+        let allPlaces = [], map, markersGroup, isAdmin = false;
+
+        // SETTINGS & THEMES
+        function toggleDropdown() { document.getElementById("acc-menu").classList.toggle("show"); }
+        function setTheme(theme) {
+            document.body.classList.remove('dark-mode', 'high-contrast');
+            if(theme === 'dark') document.body.classList.add('dark-mode');
+            if(theme === 'high-contrast') document.body.classList.add('high-contrast');
+        }
+        function toggleDyslexicFont() {
+            const isDys = document.body.classList.toggle('dyslexic-font');
+            document.getElementById('dyslexicBtn').innerText = isDys ? "Dyslexic Font: On" : "Dyslexic Font: Off";
+        }
+        function changeTextSize(size) { document.documentElement.style.fontSize = size + 'px'; }
+
+        // MAP LOGIC
+        function initMap() {
+            if (map) return;
+            const bounds = L.latLngBounds(L.latLng(53.2, -114.1), L.latLng(53.9, -112.9));
+            map = L.map('map', {
+                center: [53.5461, -113.4938],
+                zoom: 11,
+                minZoom: 10,
+                maxBounds: bounds,
+                maxBoundsViscosity: 1.0
+            });
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            markersGroup = L.layerGroup().addTo(map);
+        }
+
+        async function loadPlaces() {
+            const { data, error } = await _supabase.from('Places').select('*');
+            if (!error) { allPlaces = data; filterPlaces(); }
+        }
+
+        function filterPlaces() {
+            const list = document.getElementById('places-list');
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const activeFilters = Array.from(document.querySelectorAll('.filter:checked')).map(cb => cb.id);
+            
+            list.innerHTML = '';
+            markersGroup.clearLayers();
+
+            allPlaces.forEach(p => {
+                const matchesName = p.name.toLowerCase().includes(term);
+                const matchesFeatureSearch = 
+                    (term.includes("wheel") && p.wheel_chair) ||
+                    (term.includes("noise") && p.low_noise_level) ||
+                    (term.includes("asl") && p.ASL_accessible) ||
+                    (term.includes("door") && p.automatic_doors) ||
+                    (term.includes("sensory") && p.low_sensory);
+
+                const matchesSidebarFilters = activeFilters.every(f => p[f] === true);
+
+                if ((matchesName || matchesFeatureSearch || term === "") && matchesSidebarFilters) {
+                    if (p.lat && p.lng) { L.marker([p.lat, p.lng]).addTo(markersGroup).bindPopup(p.name); }
+
+                    let tagsHtml = '<div class="tag-container">';
+                    if(p.wheel_chair) tagsHtml += '<span class="tag-item">Wheelchair</span>';
+                    if(p.low_noise_level) tagsHtml += '<span class="tag-item">Quiet</span>';
+                    if(p.service_animals) tagsHtml += '<span class="tag-item">Service Animals</span>';
+                    if(p.ASL_accessible) tagsHtml += '<span class="tag-item">ASL</span>';
+                    if(p.automatic_doors) tagsHtml += '<span class="tag-item">Auto Doors</span>';
+                    if(p.low_sensory) tagsHtml += '<span class="tag-item">Low Sensory</span>';
+                    tagsHtml += '</div>';
+
+                    list.innerHTML += `
+                        <div class="place-card" onclick="map.flyTo([${p.lat}, ${p.lng}], 15)">
+                            ${p.image_url ? `<img src="${p.image_url}" style="width:100%; height:160px; object-fit:cover;">` : ''}
+                            <div class="card-content">
+                                <h3 style="margin:0; color:var(--accent)">${p.name}</h3>
+                                ${tagsHtml}
+                                ${isAdmin ? `<button class="delete-btn" onclick="event.stopPropagation(); deletePlace('${p.id}')">Delete</button>` : ''}
+                            </div>
+                        </div>`;
+                }
+            });
+        }
+
+        // FORM SUBMISSION
+        document.getElementById('postForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Saving..."; btn.disabled = true;
+
+            let imageUrl = "";
+            const file = document.getElementById('image-upload').files[0];
+            if (file) {
+                const fileName = `${Date.now()}-${file.name}`;
+                const { data: upData, error: upErr } = await _supabase.storage.from('place-images').upload(fileName, file);
+                if (!upErr) {
+                    const { data: urlData } = _supabase.storage.from('place-images').getPublicUrl(fileName);
+                    imageUrl = urlData.publicUrl;
+                }
+            }
+
+            const { error } = await _supabase.from('Places').insert([{
+                name: document.getElementById('name').value,
+                address: document.getElementById('address-input').value,
+                lat: 53.5461, lng: -113.4938, // Default Edmonton center
+                image_url: imageUrl,
+                wheel_chair: document.getElementById('wheelchair-checkbox').checked,
+                service_animals: document.getElementById('service-animals-checkbox').checked,
+                ASL_accessible: document.getElementById('ASL-checkbox').checked,
+                low_noise_level: document.getElementById('low-noise-checkbox').checked,
+                low_sensory: document.getElementById('low-sensory-checkbox').checked,
+                automatic_doors: document.getElementById('automatic-doors-checkbox').checked
+            }]);
+
+            if (!error) {
+                alert("Success!");
+                e.target.reset();
+                showView('explore');
+            } else {
+                alert("Error: " + error.message);
+            }
+            btn.innerText = "Submit Spot"; btn.disabled = false;
+        });
+
+        function showView(view) {
+            document.getElementById('explore-view').style.display = view === 'explore' ? 'block' : 'none';
+            document.getElementById('post-view').style.display = view === 'post' ? 'block' : 'none';
+            if(view === 'explore') { initMap(); loadPlaces(); }
+        }
+
+        function adminLogin() {
+            if(prompt("Admin Password:") === "EDMONTON2026") { isAdmin = true; filterPlaces(); }
+        }
+
+        window.onload = () => { initMap(); loadPlaces(); };
+        window.onclick = (e) => { if (!e.target.matches('.dropbtn')) document.getElementById("acc-menu").classList.remove("show"); };
+    </script>
 </body>
 </html>

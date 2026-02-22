@@ -195,7 +195,7 @@
         }
 
         #clear-filters-btn:active {
-            transform: scale(0.95); /* Slight "click" effect */
+            transform: scale(0.95); 
         }
 
          body.high-contrast #clear-filters-btn {
@@ -336,8 +336,8 @@
 
         .vote-container {
             display: flex;
-            align-items: center; /* Aligns text and buttons vertically */
-            justify-content: space-between; /* Pushes text to left, buttons to right */
+            align-items: center; 
+            justify-content: space-between; 
             gap: 10px;
             margin-top: 15px;
             padding-top: 10px;
@@ -345,17 +345,17 @@
         }
 
         .vote-prompt {
-            font-size: 0.75rem; /* Slightly smaller to fit on one line */
+            font-size: 0.75rem;
             margin: 0;
             font-weight: 500;
             line-height: 1.2;
-            flex: 1; /* Allows text to take up available space */
+            flex: 1; 
         }
 
         .vote-buttons-wrapper {
             display: flex;
             gap: 8px;
-            white-space: nowrap; /* Prevents buttons from splitting up */
+            white-space: nowrap; 
         }
     </style>
 </head>
@@ -759,7 +759,7 @@
         });
 
         function clearAllFilters() {
-            // Uncheck all boxes
+            
             const checkboxes = document.querySelectorAll('.filter');
             checkboxes.forEach(cb => cb.checked = false);
             activeFilters = []; 
