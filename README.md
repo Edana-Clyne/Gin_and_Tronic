@@ -67,7 +67,7 @@ Since this is a client-side application, you can run it directly in a browser or
 Supabase Configuration:
 Ensure your Supabase project has a bucket named place-images set to Public to allow photo uploads.
 
-🤝 Contributing
+ Contributing
 We welcome contributions! If you have ideas for new accessibility tags or UI improvements:
 
 Fork the Project.
@@ -81,4 +81,5 @@ Push to the Branch (git push origin feature/AmazingFeature).
 Open a Pull Request.
 
 Built with ❤️ for a more accessible world.
+
 
